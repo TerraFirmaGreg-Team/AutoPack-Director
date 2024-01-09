@@ -2,6 +2,7 @@ package net.jan.moddirector.launchwrapper;
 
 import net.jan.moddirector.core.ModDirector;
 import net.jan.moddirector.core.logging.ModDirectorSeverityLevel;
+import net.jan.moddirector.core.manage.ModDirectorError;
 import net.jan.moddirector.launchwrapper.forge.ForgeLateLoader;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
@@ -49,7 +50,8 @@ public class ModDirectorTweaker implements ITweaker {
                 director.errorExit();
             }
         } catch(InterruptedException | IOException e) {
-            throw new RuntimeException(e);
+            director.addError(new ModDirectorError(ModDirectorSeverityLevel.ERROR, "Activation error", e));
+            director.errorExit();
         }
 
         ForgeLateLoader loader = new ForgeLateLoader(this, director, classLoader);

@@ -13,12 +13,15 @@ import net.jan.moddirector.core.manage.install.InstalledMod;
 import net.jan.moddirector.core.manage.ModDirectorError;
 import net.jan.moddirector.core.manage.select.InstallSelector;
 import net.jan.moddirector.core.platform.ModDirectorPlatform;
+import net.jan.moddirector.core.ui.RestartRequiredDialog;
 import net.jan.moddirector.core.ui.SetupDialog;
 import net.jan.moddirector.core.ui.VersionMismatchDialog;
 import net.jan.moddirector.core.ui.page.ProgressPage;
 import net.jan.moddirector.core.util.WebClient;
 import net.jan.moddirector.core.util.WebGetResponse;
+import net.minecraftforge.fml.exit.QualifiedExit;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,6 +39,15 @@ public class ModDirector {
         if(instance != null) {
             throw new IllegalStateException("ModDirector has already been bootstrapped using platform " +
                     platform.name());
+        }
+
+        try {
+            UIManager.setLookAndFeel(
+                UIManager.getSystemLookAndFeelClassName());
+        }
+        catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException |
+               IllegalAccessException e) {
+            e.printStackTrace();
         }
 
         instance = new ModDirector(platform);
@@ -185,6 +197,16 @@ public class ModDirector {
 
         if(versionMismatchDialog != null) {
             versionMismatchDialog.dispose();
+        }
+
+        if (modpackConfiguration.requiresRestart() && !freshInstalls.isEmpty()) {
+            logger.log(ModDirectorSeverityLevel.INFO, "ModDirector", "CORE",
+                "Installation complete, a restart is required to complete initialization.");
+            if (!platform.headless()) {
+                RestartRequiredDialog dialog = new RestartRequiredDialog(modpackConfiguration);
+                dialog.dispose();
+            }
+            QualifiedExit.exit(0);
         }
 
         return !hasFatalError();

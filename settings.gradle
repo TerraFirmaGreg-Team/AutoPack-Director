@@ -1,4 +1,4 @@
-rootProject.name = 'mod-director'
+rootProject.name = 'modpack-director'
 include 'mod-director-core'
 include 'mod-director-standalone'
 include 'mod-director-launchwrapper'
