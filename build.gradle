@@ -1,7 +1,22 @@
+plugins {
+    id 'java-library'
+}
+
 group 'com.juanmuscaria'
 version '1.0'
 
-subprojects {
+dependencies {
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-core", version: "2.13.5"
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.13.5"
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.13.5"
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'commons-io:commons-io:2.13.0'
+
+    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:233.13135.104'
+    implementation 'io.github.vincenzopalazzo:material-ui-swing:1.1.2'
+}
+
+allprojects {
     group = rootProject.group
     version = rootProject.version
 
