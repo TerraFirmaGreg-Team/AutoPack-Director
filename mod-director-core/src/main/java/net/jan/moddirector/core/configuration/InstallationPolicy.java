@@ -17,16 +17,16 @@ public class InstallationPolicy {
 
     @JsonCreator
     public InstallationPolicy(
-            @JsonProperty(value = "continueOnFailedDownload") boolean continueOnFailedDownload,
-            @JsonProperty(value = "optionalKey") String optionalKey,
-            @JsonProperty(value = "selectedByDefault") Boolean selectedByDefault,
-            @JsonProperty(value = "name") String name,
-            @JsonProperty(value = "description") String description,
-            @JsonProperty(value = "extract") boolean extract,
-            @JsonProperty(value = "deleteAfterExtract") boolean deleteAfterExtract,
-            @JsonProperty(value = "downloadAlways") boolean downloadAlways,
-            @JsonProperty(value = "supersede") String supersede,
-            @JsonProperty(value = "modpackVersion") String modpackVersion
+        @JsonProperty(value = "continueOnFailedDownload") boolean continueOnFailedDownload,
+        @JsonProperty(value = "optionalKey") String optionalKey,
+        @JsonProperty(value = "selectedByDefault") Boolean selectedByDefault,
+        @JsonProperty(value = "name") String name,
+        @JsonProperty(value = "description") String description,
+        @JsonProperty(value = "extract") boolean extract,
+        @JsonProperty(value = "deleteAfterExtract") boolean deleteAfterExtract,
+        @JsonProperty(value = "downloadAlways") boolean downloadAlways,
+        @JsonProperty(value = "supersede") String supersede,
+        @JsonProperty(value = "modpackVersion") String modpackVersion
     ) {
         this.continueOnFailedDownload = continueOnFailedDownload;
         this.optionalKey = optionalKey;

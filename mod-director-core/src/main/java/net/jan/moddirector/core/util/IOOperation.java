@@ -14,7 +14,7 @@ public class IOOperation {
 
         long progress = 0;
         int read;
-        while((read = inputStream.read(buffer)) > 0) {
+        while ((read = inputStream.read(buffer)) > 0) {
             progress += read;
             callback.reportProgress(progress, knownLength);
             outputStream.write(buffer, 0, read);
@@ -28,7 +28,7 @@ public class IOOperation {
         byte[] buffer = new byte[8192];
 
         int read;
-        while((read = inputStream.read(buffer)) > 0) {
+        while ((read = inputStream.read(buffer)) > 0) {
             outputStream.write(buffer, 0, read);
         }
 

@@ -1,9 +1,9 @@
 package net.jan.moddirector.core.configuration.modpack;
 
-import java.net.URL;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.net.URL;
 
 public class ModpackConfiguration {
     private final String packName;
@@ -15,12 +15,12 @@ public class ModpackConfiguration {
 
     @JsonCreator
     public ModpackConfiguration(
-            @JsonProperty(value = "packName", required = true) String packName,
-            @JsonProperty("icon") ModpackIconConfiguration icon,
-            @JsonProperty("localVersion") String localVersion,
-            @JsonProperty("remoteVersion") URL remoteVersion,
-            @JsonProperty("refuseLaunch") boolean refuseLaunch,
-            @JsonProperty("requiresRestart") boolean requiresRestart
+        @JsonProperty(value = "packName", required = true) String packName,
+        @JsonProperty("icon") ModpackIconConfiguration icon,
+        @JsonProperty("localVersion") String localVersion,
+        @JsonProperty("remoteVersion") URL remoteVersion,
+        @JsonProperty("refuseLaunch") boolean refuseLaunch,
+        @JsonProperty("requiresRestart") boolean requiresRestart
     ) {
         this.packName = packName;
         this.icon = icon;
@@ -28,6 +28,17 @@ public class ModpackConfiguration {
         this.remoteVersion = remoteVersion;
         this.refuseLaunch = refuseLaunch;
         this.requiresRestart = requiresRestart;
+    }
+
+    public static ModpackConfiguration createDefault() {
+        return new ModpackConfiguration(
+            "Modpack Director",
+            null,
+            null,
+            null,
+            false,
+            false
+        );
     }
 
     public String packName() {
@@ -52,16 +63,5 @@ public class ModpackConfiguration {
 
     public boolean requiresRestart() {
         return requiresRestart;
-    }
-
-    public static ModpackConfiguration createDefault() {
-        return new ModpackConfiguration(
-                "Modpack",
-                null,
-                null,
-                null,
-                false,
-            false
-        );
     }
 }

@@ -1,21 +1,16 @@
 package net.jan.moddirector.standalone;
 
-import net.jan.moddirector.core.platform.ModDirectorPlatform;
-import net.jan.moddirector.core.logging.ModDirectorLogger;
-import net.jan.moddirector.core.platform.PlatformSide;
+import com.juanmuscaria.modpackdirector.logging.JavaLogger;
+import com.juanmuscaria.modpackdirector.logging.LoggerDelegate;
+import com.juanmuscaria.modpackdirector.util.PlatformDelegate;
+import com.juanmuscaria.modpackdirector.util.Side;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
-public class ModDirectorStandalonePlatform implements ModDirectorPlatform {
-    private final ModDirectorLogger logger;
-
-    public ModDirectorStandalonePlatform() {
-        this.logger = new ModDirectorStandaloneLogger();
-    }
+public class ModDirectorStandalonePlatform implements PlatformDelegate {
+    private final LoggerDelegate logger = new JavaLogger(Logger.getLogger("ModDirector"));
 
     @Override
     public String name() {
@@ -48,17 +43,13 @@ public class ModDirectorStandalonePlatform implements ModDirectorPlatform {
     }
 
     @Override
-    public ModDirectorLogger logger() {
+    public LoggerDelegate logger() {
         return logger;
     }
 
     @Override
-    public PlatformSide side() {
-        return null;
-    }
-
-    @Override
-    public void bootstrap() {
+    public Side side() {
+        return Side.UNKNOWN;
     }
 
     @Override

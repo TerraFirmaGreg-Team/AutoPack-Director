@@ -1,39 +1,30 @@
 package net.jan.moddirector.core.manage;
 
-import net.jan.moddirector.core.logging.ModDirectorSeverityLevel;
+import lombok.Getter;
 
+import java.util.logging.Level;
+
+@Getter
 public class ModDirectorError {
-    private final ModDirectorSeverityLevel level;
+    private final Level level;
     private final String message;
     private final Throwable exception;
 
-    public ModDirectorError(ModDirectorSeverityLevel level, String message) {
+    public ModDirectorError(Level level, String message) {
         this.level = level;
         this.message = message;
         this.exception = null;
     }
 
-    public ModDirectorError(ModDirectorSeverityLevel level, Throwable exception) {
+    public ModDirectorError(Level level, Throwable exception) {
         this.level = level;
         this.message = exception.getMessage();
         this.exception = exception;
     }
 
-    public ModDirectorError(ModDirectorSeverityLevel level, String message, Throwable exception) {
+    public ModDirectorError(Level level, String message, Throwable exception) {
         this.level = level;
         this.message = message;
         this.exception = exception;
-    }
-
-    public ModDirectorSeverityLevel getLevel() {
-        return level;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Throwable getException() {
-        return exception;
     }
 }

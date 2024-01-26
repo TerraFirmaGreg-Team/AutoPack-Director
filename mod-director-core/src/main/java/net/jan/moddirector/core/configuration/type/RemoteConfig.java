@@ -1,12 +1,11 @@
 package net.jan.moddirector.core.configuration.type;
 
-import java.net.URL;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class RemoteConfig
-{
+import java.net.URL;
+
+public class RemoteConfig {
     private final URL url;
 
     @JsonCreator

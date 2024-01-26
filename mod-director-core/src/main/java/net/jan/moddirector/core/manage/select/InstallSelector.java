@@ -24,29 +24,29 @@ public class InstallSelector {
     }
 
     public void accept(
-            List<ModDirectorRemoteMod> excludedMods,
-            List<InstallableMod> freshInstalls,
-            List<InstallableMod> reInstall
+        List<ModDirectorRemoteMod> excludedMods,
+        List<InstallableMod> freshInstalls,
+        List<InstallableMod> reInstall
     ) {
         List<String> ignoredGroups = new ArrayList<>();
 
-        for(ModDirectorRemoteMod mod : excludedMods) {
+        for (ModDirectorRemoteMod mod : excludedMods) {
             InstallationPolicy policy = mod.getInstallationPolicy();
-            if(policy != null) {
+            if (policy != null) {
                 String group = policy.getOptionalKey();
-                if(group != null && !group.equals("$")) {
+                if (group != null && !group.equals("$")) {
                     ignoredGroups.add(group);
                 }
             }
         }
 
-        for(InstallableMod mod : reInstall) {
+        for (InstallableMod mod : reInstall) {
             ModDirectorRemoteMod remoteMod = mod.getRemoteMod();
-            if(remoteMod != null) {
+            if (remoteMod != null) {
                 InstallationPolicy policy = remoteMod.getInstallationPolicy();
-                if(policy != null) {
+                if (policy != null) {
                     String group = policy.getOptionalKey();
-                    if(group != null && !group.equals("$")) {
+                    if (group != null && !group.equals("$")) {
                         ignoredGroups.add(group);
                     }
                 }
@@ -54,21 +54,21 @@ public class InstallSelector {
             }
         }
 
-        for(InstallableMod mod : freshInstalls) {
+        for (InstallableMod mod : freshInstalls) {
             ModDirectorRemoteMod remoteMod = mod.getRemoteMod();
-            if(remoteMod != null) {
+            if (remoteMod != null) {
                 InstallationPolicy policy = remoteMod.getInstallationPolicy();
-                if(policy != null) {
+                if (policy != null) {
                     String optionalKey = policy.getOptionalKey();
-                    if(optionalKey == null) {
+                    if (optionalKey == null) {
                         alwaysInstall.add(mod);
-                    } else if(!ignoredGroups.contains(optionalKey)) {
+                    } else if (!ignoredGroups.contains(optionalKey)) {
                         SelectableInstallOption installOption = new SelectableInstallOption(
-                                policy.isSelectedByDefault(),
-                                policy.getName() == null ? remoteMod.offlineName() : policy.getName(),
-                                policy.getDescription()
+                            policy.isSelectedByDefault(),
+                            policy.getName() == null ? remoteMod.offlineName() : policy.getName(),
+                            policy.getDescription()
                         );
-                        if(optionalKey.equals("$")) {
+                        if (optionalKey.equals("$")) {
                             singleOptions.add(installOption);
                         } else {
                             groupOptions.computeIfAbsent(optionalKey, k -> new ArrayList<>()).add(installOption);
@@ -96,7 +96,7 @@ public class InstallSelector {
         List<InstallableMod> mods = new ArrayList<>(alwaysInstall);
 
         optionsToMod.forEach((option, mod) -> {
-            if(option.isSelected()) {
+            if (option.isSelected()) {
                 mods.add(mod);
             }
         });
@@ -108,7 +108,7 @@ public class InstallSelector {
         List<InstallableMod> mods = new ArrayList<>();
 
         optionsToMod.forEach((option, mod) -> {
-            if(!option.isSelected()) {
+            if (!option.isSelected()) {
                 mods.add(mod);
             }
         });

@@ -2,9 +2,8 @@ package net.jan.moddirector.core.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import net.jan.moddirector.core.ModDirector;
-import net.jan.moddirector.core.logging.ModDirectorSeverityLevel;
-import net.jan.moddirector.core.platform.PlatformSide;
+import com.juanmuscaria.modpackdirector.util.PlatformDelegate;
+import com.juanmuscaria.modpackdirector.util.Side;
 import net.jan.moddirector.core.util.HashResult;
 
 import java.io.IOException;
@@ -18,19 +17,19 @@ import java.util.Map;
 
 public class RemoteModMetadata {
     private final Map<String, String> hashes;
-    private final PlatformSide side;
+    private final Side side;
 
     @JsonCreator
     public RemoteModMetadata(
-            @JsonProperty(value = "hash") LinkedHashMap<String, String> hashes,
-            @JsonProperty(value = "side") PlatformSide side
+        @JsonProperty(value = "hash") LinkedHashMap<String, String> hashes,
+        @JsonProperty(value = "side") Side side
     ) {
         this.hashes = hashes;
         this.side = side;
     }
 
-    public HashResult checkHashes(Path file, ModDirector director) {
-        if(hashes == null) {
+    public HashResult checkHashes(Path file, PlatformDelegate platform) {
+        if (hashes == null) {
             return HashResult.UNKNOWN;
         }
 
@@ -38,15 +37,14 @@ public class RemoteModMetadata {
 
         try {
             data = Files.readAllBytes(file);
-        } catch(IOException e) {
-            director.getLogger().logThrowable(ModDirectorSeverityLevel.WARN, "ModDirector/RemoteHash",
-                    "CORE", e, "Failed to open %s for hash calculation, assuming hash does not match",
-                    file.toString());
+        } catch (IOException e) {
+            platform.logger().warn("Failed to open {0} for hash calculation, assuming hash does not match",
+                file.toString(), e);
             return HashResult.UNMATCHED;
         }
 
         StringBuilder hashBuilder = new StringBuilder();
-        for(Map.Entry<String, String> hashEntry : hashes.entrySet()) {
+        for (Map.Entry<String, String> hashEntry : hashes.entrySet()) {
             hashBuilder.setLength(0);
 
             try {
@@ -54,28 +52,26 @@ public class RemoteModMetadata {
 
                 byte[] hash = digest.digest(data);
                 hashBuilder.append(new BigInteger(1, hash).toString(16));
-                while(hashBuilder.length() < 32) {
+                while (hashBuilder.length() < 32) {
                     hashBuilder.insert(0, '0');
                 }
 
-                if(!hashBuilder.toString().equals(hashEntry.getValue())) {
+                if (!hashBuilder.toString().equals(hashEntry.getValue())) {
                     return HashResult.UNMATCHED;
                 } else {
                     return HashResult.MATCHED;
                 }
-            } catch(NoSuchAlgorithmException e) {
-                director.getLogger().log(ModDirectorSeverityLevel.WARN, "ModDirector/RemoteModMetadata",
-                        "CORE", "Hash algorithm %s not supported by JVM", hashEntry.getKey());
+            } catch (NoSuchAlgorithmException e) {
+                platform.logger().warn("Hash algorithm {0} not supported by JVM", hashEntry.getKey());
             }
         }
 
-        director.getLogger().log(ModDirectorSeverityLevel.WARN, "ModDirector/RemoteModMetadata",
-                "CORE", "All given hash algorithms are not supported by the JVM");
+        platform.logger().warn("All given hash algorithms are not supported by the JVM");
         return HashResult.UNKNOWN;
     }
 
-    public boolean shouldTryInstall(ModDirector modDirector) {
-        PlatformSide currentSide = modDirector.getPlatform().side();
-        return currentSide == null || side == null || currentSide == side;
+    public boolean shouldTryInstall(PlatformDelegate platform) {
+        Side currentSide = platform.side();
+        return currentSide == null || side == Side.UNKNOWN || currentSide == side;
     }
 }

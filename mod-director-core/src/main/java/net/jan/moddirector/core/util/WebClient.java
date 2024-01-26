@@ -9,9 +9,9 @@ import java.net.URLConnection;
 public class WebClient {
     public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36";
 
-    public static WebGetResponse get(URL url) throws IOException  {
+    public static WebGetResponse get(URL url) throws IOException {
         URLConnection connection = url.openConnection();
-        if(!(connection instanceof HttpURLConnection)) {
+        if (!(connection instanceof HttpURLConnection)) {
             return new WebGetResponse(connection.getInputStream(), connection.getContentLengthLong());
         }
 
@@ -20,10 +20,10 @@ public class WebClient {
         httpConnection.setRequestProperty("User-Agent", USER_AGENT);
         httpConnection.connect();
 
-        while(true) {
+        while (true) {
             int status = httpConnection.getResponseCode();
-            if(status - 300 >= 0 && status - 300 <= 99) {
-                if(redirectCount > 10) {
+            if (status - 300 >= 0 && status - 300 <= 99) {
+                if (redirectCount > 10) {
                     throw new IOException("Server tried to redirect too many times");
                 }
 
@@ -37,7 +37,7 @@ public class WebClient {
                     url = new URL(newUrl);
                     connection = url.openConnection();
 
-                    if(!(connection instanceof HttpURLConnection)) {
+                    if (!(connection instanceof HttpURLConnection)) {
                         throw new IOException("Server sent a redirect url which was not http: " + newUrl);
                     }
 
@@ -47,7 +47,7 @@ public class WebClient {
                     httpConnection.setRequestProperty("Cookie", cookies);
                     httpConnection.setRequestProperty("User-Agent", USER_AGENT);
                     httpConnection.connect();
-                } catch(MalformedURLException e) {
+                } catch (MalformedURLException e) {
                     throw new IOException("Server sent invalid redirect url", e);
                 }
             } else {

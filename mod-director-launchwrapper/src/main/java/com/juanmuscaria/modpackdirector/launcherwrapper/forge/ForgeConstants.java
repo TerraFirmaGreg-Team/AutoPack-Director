@@ -1,4 +1,4 @@
-package net.jan.moddirector.launchwrapper.forge;
+package com.juanmuscaria.modpackdirector.launcherwrapper.forge;
 
 public class ForgeConstants {
     public static final String COREMODS_LOAD_PROPERTY = "fml.coreMods.load";
@@ -7,9 +7,9 @@ public class ForgeConstants {
     public static final String CORE_MOD_MANAGER_CLASS_LEGACY = "cpw.mods.fml.relauncher.CoreModManager";
 
     public static final String MOD_ACCESS_TRANSFORMER_CLASS =
-            "net.minecraftforge.fml.common.asm.transformers.ModAccessTransformer";
+        "net.minecraftforge.fml.common.asm.transformers.ModAccessTransformer";
     public static final String MOD_ACCESS_TRANSFORMER_CLASS_LEGACY =
-            "cpw.mods.fml.common.asm.transformers.ModAccessTransformer";
+        "cpw.mods.fml.common.asm.transformers.ModAccessTransformer";
 
     public static final String IGNORED_MODS_METHOD = "getIgnoredMods";
     public static final String IGNORED_MODS_METHOD_LEGACY = "getLoadedCoremods";

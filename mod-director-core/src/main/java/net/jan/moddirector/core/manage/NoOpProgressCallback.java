@@ -1,6 +1,6 @@
 package net.jan.moddirector.core.manage;
 
-public class NullProgressCallback implements ProgressCallback {
+public class NoOpProgressCallback implements ProgressCallback {
     @Override
     public void setSteps(int steps) {
 

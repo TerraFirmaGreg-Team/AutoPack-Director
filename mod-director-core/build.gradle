@@ -2,13 +2,9 @@ plugins {
     id 'java-library'
 }
 
-group 'net.jan'
-version rootProject.version
-
-sourceCompatibility = 1.8
-
 repositories {
     mavenCentral()
+    maven { url("https://www.jetbrains.com/intellij-repository/releases/") }
 }
 
 dependencies {
@@ -17,4 +13,7 @@ dependencies {
     implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.13.5"
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'commons-io:commons-io:2.13.0'
+
+    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:233.13135.104'
+    implementation 'io.github.vincenzopalazzo:material-ui-swing:1.1.2'
 }

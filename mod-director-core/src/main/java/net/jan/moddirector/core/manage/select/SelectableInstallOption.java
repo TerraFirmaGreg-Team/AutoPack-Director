@@ -1,10 +1,15 @@
 package net.jan.moddirector.core.manage.select;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
 public class SelectableInstallOption {
     private final String description;
     private final String name;
 
-    private boolean selected;
+    @Setter
+    private volatile boolean selected;
 
     public SelectableInstallOption(boolean selectedByDefault, String name, String description) {
         this.selected = selectedByDefault;
@@ -12,19 +17,4 @@ public class SelectableInstallOption {
         this.description = description;
     }
 
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
 }

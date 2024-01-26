@@ -10,9 +10,9 @@ public class ModpackIconConfiguration {
 
     @JsonCreator
     public ModpackIconConfiguration(
-            @JsonProperty(value = "path", required = true) String path,
-            @JsonProperty("width") int width,
-            @JsonProperty("height") int height
+        @JsonProperty(value = "path", required = true) String path,
+        @JsonProperty("width") int width,
+        @JsonProperty("height") int height
     ) {
         this.path = path;
         this.width = width;

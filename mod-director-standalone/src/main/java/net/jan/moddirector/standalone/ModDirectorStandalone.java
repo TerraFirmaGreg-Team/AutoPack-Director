@@ -1,16 +1,13 @@
 package net.jan.moddirector.standalone;
 
-import net.jan.moddirector.core.ModDirector;
-
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import com.juanmuscaria.modpackdirector.ModpackDirector;
 
 public class ModDirectorStandalone {
-    public static void main(String[] args) throws InterruptedException, IOException {
+    public static void main(String[] args) throws Exception {
         ModDirectorStandalonePlatform platform = new ModDirectorStandalonePlatform();
-        ModDirector director = ModDirector.bootstrap(platform);
+        ModpackDirector director = new ModpackDirector(platform);
 
-        if(!director.activate(Long.MAX_VALUE, TimeUnit.DAYS)) {
+        if (!director.call()) {
             director.errorExit();
         }
 

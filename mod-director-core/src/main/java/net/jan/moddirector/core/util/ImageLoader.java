@@ -1,7 +1,4 @@
-package net.jan.moddirector.core.ui;
-
-import net.jan.moddirector.core.util.WebClient;
-import net.jan.moddirector.core.util.WebGetResponse;
+package net.jan.moddirector.core.util;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -10,6 +7,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +35,7 @@ public class ImageLoader {
         File imageFile = new File(path);
         if (!imageFile.exists()) {
             return errorLabel("File %s not found", path);
-        } else if(!imageFile.isFile()) {
+        } else if (!imageFile.isFile()) {
             return errorLabel("%s it not a file", path);
         }
 
@@ -49,7 +48,7 @@ public class ImageLoader {
     }
 
     private static JLabel readFromWeb(String path, int width, int height) {
-        try(WebGetResponse response = WebClient.get(new URL(path))) {
+        try (WebGetResponse response = WebClient.get(new URL(path))) {
             Image image = getScaled(ImageIO.read(response.getInputStream()), width, height);
             return new JLabel(new ImageIcon(image));
         } catch (MalformedURLException e) {
@@ -60,15 +59,15 @@ public class ImageLoader {
     }
 
     private static Image getScaled(BufferedImage image, int width, int height) {
-        if(width <= 0 && height <= 0) {
+        if (width <= 0 && height <= 0) {
             return image;
         }
 
-        if(width <= 0) {
+        if (width <= 0) {
             width = image.getWidth();
         }
 
-        if(height <= 0) {
+        if (height <= 0) {
             height = image.getHeight();
         }
 
@@ -79,5 +78,28 @@ public class ImageLoader {
         JLabel label = new JLabel(String.format(fmt, args));
         label.setForeground(Color.RED);
         return label;
+    }
+
+    public static Image getImage(String path, int width, int height) throws IOException, URISyntaxException {
+        for (String protocol : WEB_PROTOCOLS) {
+            if (path.startsWith(protocol)) {
+                return fromWeb(path, width, height);
+            }
+        }
+        if (path.startsWith(FILE_PROTOCOL)) {
+            path = path.substring(7);
+        }
+
+        return fromFile(path, width, height);
+    }
+
+    private static Image fromFile(String path, int width, int height) throws IOException {
+        return getScaled(ImageIO.read(new File(path)), width, height);
+    }
+
+    private static Image fromWeb(String path, int width, int height) throws IOException, URISyntaxException {
+        try (WebGetResponse response = WebClient.get(new URI(path).toURL())) {
+            return getScaled(ImageIO.read(response.getInputStream()), width, height);
+        }
     }
 }

@@ -1,6 +1,6 @@
 package net.jan.moddirector.core.manage.install;
 
-import net.jan.moddirector.core.ModDirector;
+import com.juanmuscaria.modpackdirector.ModpackDirector;
 import net.jan.moddirector.core.configuration.ModDirectorRemoteMod;
 import net.jan.moddirector.core.configuration.RemoteModInformation;
 import net.jan.moddirector.core.exception.ModDirectorException;
@@ -32,7 +32,7 @@ public class InstallableMod {
         return targetFile;
     }
 
-    public void performInstall(ModDirector director, ProgressCallback callback) throws ModDirectorException {
+    public void performInstall(ModpackDirector director, ProgressCallback callback) throws ModDirectorException {
         remoteMod.performInstall(targetFile, callback, director, remoteInformation);
     }
 }
