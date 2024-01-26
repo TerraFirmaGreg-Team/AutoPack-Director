@@ -9,10 +9,12 @@ import lombok.Getter;
 import net.jan.moddirector.core.configuration.ConfigurationController;
 import net.jan.moddirector.core.configuration.ModDirectorRemoteMod;
 import net.jan.moddirector.core.configuration.modpack.ModpackConfiguration;
+import net.jan.moddirector.core.exception.ModDirectorException;
 import net.jan.moddirector.core.manage.InstallController;
 import net.jan.moddirector.core.manage.ModDirectorError;
 import net.jan.moddirector.core.manage.NoOpProgressCallback;
 import net.jan.moddirector.core.manage.ProgressCallback;
+import net.jan.moddirector.core.manage.check.StopModReposts;
 import net.jan.moddirector.core.manage.install.InstallableMod;
 import net.jan.moddirector.core.manage.install.InstalledMod;
 import net.jan.moddirector.core.manage.select.InstallSelector;
@@ -26,6 +28,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +52,7 @@ public class ModpackDirector implements Callable<Boolean> {
     private final LookAndFeel prevLookAndFeel;
     private final ConfigurationController configurationController;
     private final InstallController installController;
+    private final StopModReposts stopModReposts;
     private String modpackRemoteVersion;
 
     public ModpackDirector(PlatformDelegate platform) {
@@ -57,6 +61,7 @@ public class ModpackDirector implements Callable<Boolean> {
         this.prevLookAndFeel = UIManager.getLookAndFeel();
         this.configurationController = new ConfigurationController(this, platform.configurationDirectory());
         this.installController = new InstallController(this);
+        this.stopModReposts = new StopModReposts(this);
 
         UITheme.apply("material-dark", logger);
     }
@@ -251,5 +256,9 @@ public class ModpackDirector implements Callable<Boolean> {
                 ));
             }
         }
+    }
+
+    public void checkUrl(URL url) throws ModDirectorException {
+        this.stopModReposts.check(url);
     }
 }

@@ -107,7 +107,7 @@ public class UrlRemoteMod extends ModDirectorRemoteMod {
                 progressCallback.message("Following redirect " + (i + 2) + " out of " + follows.length);
             }
 
-            //StopModReposts.check(ModDirector.getInstance(), urlToFollow);
+            director.checkUrl(urlToFollow);
 
             try (WebGetResponse response = WebClient.get(urlToFollow)) {
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
