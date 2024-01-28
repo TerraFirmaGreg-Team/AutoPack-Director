@@ -4,8 +4,10 @@ import com.juanmuscaria.modpackdirector.ModpackDirector;
 import com.juanmuscaria.modpackdirector.logging.LoggerDelegate;
 import com.juanmuscaria.modpackdirector.util.PlatformDelegate;
 import com.juanmuscaria.modpackdirector.util.Side;
-import cpw.mods.modlauncher.Environment;
-import cpw.mods.modlauncher.api.*;
+import cpw.mods.modlauncher.api.IEnvironment;
+import cpw.mods.modlauncher.api.ILaunchHandlerService;
+import cpw.mods.modlauncher.api.ITransformationService;
+import cpw.mods.modlauncher.api.ITransformer;
 import net.jan.moddirector.core.manage.ModDirectorError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,21 +18,20 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 
 public class ModpackDirectorService implements ITransformationService, PlatformDelegate {
     private final LoggerDelegate logger = new Log4jLogger(LogManager.getLogger("ModpackDirector"));
-    private ModpackDirector director;
     private Side side = Side.UNKNOWN;
     private Path gameDir;
 
     @Override
     public void initialize(IEnvironment env) {
         this.side = figureOutSide(env);
-        this.gameDir = env.getProperty(IEnvironment.Keys.GAMEDIR.get()).orElseThrow();
-        this.director =  new ModpackDirector(this);
+        this.gameDir = env.getProperty(IEnvironment.Keys.GAMEDIR.get()).get();
+        ModpackDirector director = new ModpackDirector(this);
         logger.info("Detected side: {0}", side);
 
         try {
@@ -41,6 +42,11 @@ public class ModpackDirectorService implements ITransformationService, PlatformD
             director.addError(new ModDirectorError(Level.SEVERE, "Activation error", e));
             director.errorExit();
         }
+    }
+
+    @Override
+    public void beginScanning(IEnvironment iEnvironment) {
+
     }
 
     @Override
@@ -99,8 +105,7 @@ public class ModpackDirectorService implements ITransformationService, PlatformD
         return GraphicsEnvironment.isHeadless();
     }
 
-    @Override
-    public List<? extends ITransformer<?>> transformers() {
+    public List<ITransformer> transformers() {
         return new ArrayList<>();
     }
 
