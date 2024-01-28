@@ -25,6 +25,7 @@ public class UITheme {
 
     public static void apply(String themeName, LoggerDelegate logger) {
         try {
+            UIManager.put("ClassLoader", MaterialLookAndFeel.class.getClassLoader());
             UIManager.setLookAndFeel(new MaterialLookAndFeel(forName(themeName)));
         } catch (Throwable e) {
             logger.warn("Unable to set UI look and feel", e);

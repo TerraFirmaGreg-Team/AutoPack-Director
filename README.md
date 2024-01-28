@@ -9,4 +9,4 @@ At the moment, this fork is a work in progress undergoing a major rewrite of the
 # Credits
 
 * [File Director](https://github.com/TerraFirmaCraft-The-Final-Frontier/FileDirector) - For the base of this project
-* [Modpack Director](https://github.com/Janrupf/mod-director) - Original project
+* [Mod Director](https://github.com/Janrupf/mod-director) - Original project

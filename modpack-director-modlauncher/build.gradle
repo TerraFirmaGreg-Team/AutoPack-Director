@@ -1,0 +1,40 @@
+plugins {
+    id 'java-library'
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+}
+
+repositories {
+    maven {
+        name "neoforged"
+        url "https://maven.neoforged.net/releases"
+    }
+}
+
+dependencies {
+    implementation project(":")
+    compileOnly "cpw.mods:modlauncher:10.1.10"
+    compileOnly "org.apache.logging.log4j:log4j-api:2.20.0"
+}
+
+afterEvaluate {
+    java {
+        toolchain.languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"   : "ModDirector",
+                "Specification-Vendor"  : "Janrupf",
+                "Specification-Version" : 1,
+                "Implementation-Title"  : "ModpackDirectorModlauncher",
+                "Implementation-Vendor" : "juanmuscaria",
+                "Implementation-Version": archiveVersion.get()
+        ])
+    }
+}
+
+build {
+    dependsOn(shadowJar)
+}

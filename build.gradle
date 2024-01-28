@@ -35,28 +35,30 @@ allprojects {
             }
         }
 
-        // Jabel stuff, compile with new java features while targeting java 8
-        dependencies {
-            annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.4.2'
-            annotationProcessor 'org.projectlombok:lombok:1.18.30'
-        }
-
-        configure([tasks.compileJava]) {
-            sourceCompatibility = 17 // for the IDE support
-            options.release = 8
-
-            javaCompiler = javaToolchains.compilerFor {
-                languageVersion = JavaLanguageVersion.of(17)
+        if (project.name != 'modpack-director-modlauncher') {
+            // Jabel stuff, compile with new java features while targeting java 8
+            dependencies {
+                annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.4.2'
+                annotationProcessor 'org.projectlombok:lombok:1.18.30'
             }
-        }
 
-        compileTestJava {
-            sourceCompatibility = targetCompatibility = 8
-        }
+            configure([tasks.compileJava]) {
+                sourceCompatibility = 17 // for the IDE support
+                options.release = 8
 
-        test {
-            javaLauncher = javaToolchains.launcherFor {
-                languageVersion = JavaLanguageVersion.of(8)
+                javaCompiler = javaToolchains.compilerFor {
+                    languageVersion = JavaLanguageVersion.of(17)
+                }
+            }
+
+            compileTestJava {
+                sourceCompatibility = targetCompatibility = 8
+            }
+
+            test {
+                javaLauncher = javaToolchains.launcherFor {
+                    languageVersion = JavaLanguageVersion.of(8)
+                }
             }
         }
     }

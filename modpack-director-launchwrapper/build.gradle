@@ -3,9 +3,6 @@ plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
-group 'net.jan'
-version rootProject.version
-
 repositories {
     maven {
         name = 'minecraft'
