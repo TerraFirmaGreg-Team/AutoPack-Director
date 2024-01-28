@@ -3,11 +3,8 @@ package net.jan.moddirector.core.configuration;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.juanmuscaria.modpackdirector.ModpackDirector;
 import lombok.Getter;
 import net.jan.moddirector.core.configuration.modpack.ModpackConfiguration;
@@ -19,8 +16,6 @@ import net.jan.moddirector.core.manage.ModDirectorError;
 import net.jan.moddirector.core.util.IOOperation;
 import net.jan.moddirector.core.util.WebClient;
 import net.jan.moddirector.core.util.WebGetResponse;
-import org.apache.commons.io.FileUtils;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -121,27 +116,26 @@ public class ConfigurationController {
     private void handleBundleConfig(Path configurationPath) {
         try (InputStream stream = Files.newInputStream(configurationPath);
              BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
-            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+            var jsonTree = OBJECT_MAPPER.readTree(reader);
 
-            JsonArray jsonArray = jsonObject.getAsJsonArray("curse");
-            if (jsonArray != null) {
-                for (JsonElement jsonElement : jsonArray) {
-                    configurations.add(OBJECT_MAPPER.readValue(jsonElement.toString(), CurseRemoteMod.class));
+            var jsonArray = jsonTree.get("curse");
+            if (jsonArray != null && jsonArray.isArray()) {
+                for (JsonNode jsonNode : jsonArray) {
+                    configurations.add(OBJECT_MAPPER.convertValue(jsonNode, CurseRemoteMod.class));
                 }
             }
 
-            jsonArray = jsonObject.getAsJsonArray("url");
-            if (jsonArray != null) {
-                for (JsonElement jsonElement : jsonArray) {
-                    configurations.add(OBJECT_MAPPER.readValue(jsonElement.toString(), UrlRemoteMod.class));
+            jsonArray = jsonTree.get("url");
+            if (jsonArray != null && jsonArray.isArray()) {
+                for (JsonNode jsonNode : jsonArray) {
+                    configurations.add(OBJECT_MAPPER.convertValue(jsonNode, UrlRemoteMod.class));
                 }
             }
 
-            jsonArray = jsonObject.getAsJsonArray("modify");
-            if (jsonArray != null) {
-                for (JsonElement jsonElement : jsonArray) {
-                    ModifyMod modifyMod = OBJECT_MAPPER.readValue(jsonElement.toString(), ModifyMod.class);
-                    handleModifyConfig(modifyMod);
+            jsonArray = jsonTree.get("modify");
+            if (jsonArray != null && jsonArray.isArray()) {
+                for (JsonNode jsonNode : jsonArray) {
+                    handleModifyConfig(OBJECT_MAPPER.convertValue(jsonNode, ModifyMod.class));
                 }
             }
         } catch (IOException e) {
@@ -176,7 +170,16 @@ public class ConfigurationController {
             if (modifyMod.getFileName() == null) {
                 if (Files.isDirectory(modifyModFolderPath) && modifyMod.shouldDelete()) {
                     director.getLogger().info("Deleting folder {0}", modifyModFolderPath);
-                    FileUtils.deleteDirectory(modifyModFolderPath.toFile());
+                    try (Stream<Path> paths = Files.walk(modifyModFolderPath)) {
+                        paths.forEach(path -> {
+                            try {
+                                Files.deleteIfExists(path);
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        });
+                    }
+                    Files.deleteIfExists(modifyModFolderPath);
                 }
             } else {
                 Path modifyModFilePath = modifyModFolderPath.resolve(modifyMod.getFileName());
@@ -214,12 +217,12 @@ public class ConfigurationController {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | UncheckedIOException e) {
             handleConfigException(e);
         }
     }
 
-    private void handleConfigException(IOException e) {
+    private void handleConfigException(Exception e) {
         director.getLogger().error("Failed to {0} a configuration for reading!", (e instanceof JsonParseException ? "parse" : "open"), e);
         director.addError(new ModDirectorError(Level.SEVERE,
             "Failed to " + (e instanceof JsonParseException ? "parse" : "open") + " a configuration for reading", e));

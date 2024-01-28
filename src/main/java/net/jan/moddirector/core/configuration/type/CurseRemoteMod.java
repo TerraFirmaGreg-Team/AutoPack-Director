@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.juanmuscaria.modpackdirector.ModpackDirector;
 import net.jan.moddirector.core.configuration.*;
 import net.jan.moddirector.core.exception.ModDirectorException;
@@ -76,11 +75,11 @@ public class CurseRemoteMod extends ModDirectorRemoteMod {
         try {
             URL apiUrl = new URL(String.format("https://api.curse.tools/v1/cf/mods/%s/files/%s", addonId, fileId));
             WebGetResponse response = WebClient.get(apiUrl);
-            JsonObject jsonObject;
+            JsonNode jsonObject;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
-                jsonObject = new JsonParser().parse(reader).getAsJsonObject().getAsJsonObject("data");
+                jsonObject = ConfigurationController.OBJECT_MAPPER.readTree(reader).get("data");
             }
-            information = ConfigurationController.OBJECT_MAPPER.readValue(jsonObject.toString(), CurseAddonFileInformation.class);
+            information = ConfigurationController.OBJECT_MAPPER.convertValue(jsonObject, CurseAddonFileInformation.class);
         } catch (MalformedURLException e) {
             throw new ModDirectorException("Failed to create curse.tools api url", e);
         } catch (JsonParseException e) {

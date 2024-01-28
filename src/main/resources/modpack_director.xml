@@ -7,18 +7,13 @@
     <entry key="modpack_director.selection_page.next_button_label">Next</entry>
     <entry key="modpack_director.progress.check_install">Checking installation...</entry>
     <entry key="modpack_director.progress.install">Installing %s</entry>
-    <entry key="modpack_director.restart_required">Installation finished, you may now restart your game to launch the
-        modpack.
-    </entry>
+    <entry key="modpack_director.restart_required">Installation finished, you may now restart your game to launch the modpack.</entry>
     <entry key="modpack_director.restart_required.title">Restart Required</entry>
     <entry key="modpack_director.restart_required.button">Restart</entry>
-    <entry key="modpack_director.modpack_outdated">Your modpack version does not match the latest remote version.
-    </entry>
+    <entry key="modpack_director.modpack_outdated">Your modpack version does not match the latest remote version.</entry>
     <entry key="modpack_director.modpack_outdated.title">Modpack outdated!</entry>
     <entry key="modpack_director.modpack_outdated.button">Ok</entry>
-    <entry key="modpack_director.modpack_outdated_refuse_launch">Your modpack version does not match the latest remote
-        version. Please update before launching the game.
-    </entry>
+    <entry key="modpack_director.modpack_outdated_refuse_launch">Your modpack version does not match the latest remote version. Please update before launching the game.</entry>
     <entry key="modpack_director.modpack_outdated_refuse_launch.title">Modpack Outdated</entry>
     <entry key="modpack_director.modpack_outdated_refuse_launch.button">Close</entry>
 </properties>

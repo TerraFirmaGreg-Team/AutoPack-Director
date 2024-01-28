@@ -39,5 +39,5 @@ build {
 }
 
 shadowJar {
-    relocate 'com.google.gson', 'com.juanmuscaria.modpackdirector.deps.gson'
+    exclude('META-INF/versions/**')
 }

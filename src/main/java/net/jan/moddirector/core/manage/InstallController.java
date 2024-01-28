@@ -109,14 +109,14 @@ public class InstallController {
                             callback.done();
 
                             excludedMods.add(mod);
-                            break;
+                            return null;
 
                         case MATCHED:
                             director.logger().info("Skipping download of [0] as the hashes match", targetFile.toString());
                             callback.done();
 
                             excludedMods.add(mod);
-                            break;
+                            return null;
 
                         case UNMATCHED:
                             director.logger().warn("File {0} exists, but hashes do not match, downloading again!",

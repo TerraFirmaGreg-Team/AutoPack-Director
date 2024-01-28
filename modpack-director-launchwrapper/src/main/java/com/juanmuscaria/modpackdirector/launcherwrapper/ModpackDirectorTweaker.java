@@ -62,6 +62,7 @@ public class ModpackDirectorTweaker implements ITweaker, PlatformDelegate {
         } else {
             side = Side.SERVER;
         }
+        logger.info("Detected side: {0}", side);
 
         try {
             if (!director.call()) {
@@ -72,8 +73,10 @@ public class ModpackDirectorTweaker implements ITweaker, PlatformDelegate {
             director.errorExit();
         }
 
-        ForgeLateLoader loader = new ForgeLateLoader(this, director, classLoader);
-        loader.execute();
+        if (!director.getInstalledMods().isEmpty()) {
+            ForgeLateLoader loader = new ForgeLateLoader(this, director, classLoader);
+            loader.execute();
+        }
     }
 
     @Override
