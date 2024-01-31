@@ -12,6 +12,7 @@ public class ModpackConfiguration {
     private final URL remoteVersion;
     private final boolean refuseLaunch;
     private final boolean requiresRestart;
+    private final String uiTheme;
 
     @JsonCreator
     public ModpackConfiguration(
@@ -20,7 +21,8 @@ public class ModpackConfiguration {
         @JsonProperty("localVersion") String localVersion,
         @JsonProperty("remoteVersion") URL remoteVersion,
         @JsonProperty("refuseLaunch") boolean refuseLaunch,
-        @JsonProperty("requiresRestart") boolean requiresRestart
+        @JsonProperty("requiresRestart") boolean requiresRestart,
+        @JsonProperty("uiTheme") String uiTheme
     ) {
         this.packName = packName;
         this.icon = icon;
@@ -28,6 +30,7 @@ public class ModpackConfiguration {
         this.remoteVersion = remoteVersion;
         this.refuseLaunch = refuseLaunch;
         this.requiresRestart = requiresRestart;
+        this.uiTheme = uiTheme;
     }
 
     public static ModpackConfiguration createDefault() {
@@ -37,7 +40,8 @@ public class ModpackConfiguration {
             null,
             null,
             false,
-            false
+            false,
+            "material-dark"
         );
     }
 
@@ -63,5 +67,9 @@ public class ModpackConfiguration {
 
     public boolean requiresRestart() {
         return requiresRestart;
+    }
+
+    public String uiTheme() {
+        return uiTheme;
     }
 }

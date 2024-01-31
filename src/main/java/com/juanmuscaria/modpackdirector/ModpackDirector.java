@@ -62,8 +62,6 @@ public class ModpackDirector implements Callable<Boolean> {
         this.configurationController = new ConfigurationController(this, platform.configurationDirectory());
         this.installController = new InstallController(this);
         this.stopModReposts = new StopModReposts(this);
-
-        UITheme.apply("material-dark", logger);
     }
 
     @Override
@@ -81,6 +79,7 @@ public class ModpackDirector implements Callable<Boolean> {
                 modpackRemoteVersion = reader.readLine();
             }
         }
+        UITheme.apply(modpackConfiguration.uiTheme(), logger);
 
         if (hasFatalError()) {
             return false;
