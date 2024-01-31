@@ -91,15 +91,15 @@ public class ModpackDirector implements Callable<Boolean> {
             ui = new DirectorMainGUI(messages, logger);
             ui.getModpackName().setText(modpackConfiguration.packName());
             var icon = modpackConfiguration.icon();
+            Image iconImage = null;
             if (icon != null) {
                 try {
-                    var image = ImageLoader.getImage(icon.path(), icon.width(), icon.height());
-                    ui.setModpackIcon(image, new Dimension(icon.width(), icon.height()));
+                    iconImage = ImageLoader.getImage(icon.path(), icon.width(), icon.height());
                 } catch (Throwable e) {
                     logger.error("Unable to load modpack icon {0}", icon.path(), e);
-                    ui.setModpackIcon(null, null);
                 }
             }
+            ui.setModpackIcon(iconImage, icon == null ? null : new Dimension(icon.width(), icon.height()));
             ui.setLocationRelativeTo(null);
             ui.addWindowListener(new WindowAdapter() {
                 @Override
