@@ -108,6 +108,7 @@ public class ModpackDirector implements Callable<Boolean> {
                     UnsafeExit.exit(0);
                 }
             });
+            ui.setTitle(modpackConfiguration.packName());
             ui.pack();
             ui.setVisible(true);
         }

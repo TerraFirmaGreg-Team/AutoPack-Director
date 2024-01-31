@@ -30,7 +30,12 @@ public class ModpackConfiguration {
         this.remoteVersion = remoteVersion;
         this.refuseLaunch = refuseLaunch;
         this.requiresRestart = requiresRestart;
-        this.uiTheme = uiTheme;
+        if (uiTheme == null) {
+            this.uiTheme = "material-dark";
+        } else {
+            this.uiTheme = uiTheme;
+        }
+
     }
 
     public static ModpackConfiguration createDefault() {
