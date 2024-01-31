@@ -2,6 +2,7 @@ package com.juanmuscaria.modpackdirector.launcherwrapper;
 
 import com.juanmuscaria.modpackdirector.ModpackDirector;
 import com.juanmuscaria.modpackdirector.launcherwrapper.forge.ForgeLateLoader;
+import com.juanmuscaria.modpackdirector.logging.JavaLogger;
 import com.juanmuscaria.modpackdirector.logging.LoggerDelegate;
 import com.juanmuscaria.modpackdirector.util.PlatformDelegate;
 import com.juanmuscaria.modpackdirector.util.Side;
@@ -23,7 +24,8 @@ import java.util.List;
 import java.util.logging.Level;
 
 public class ModpackDirectorTweaker implements ITweaker, PlatformDelegate {
-    private final LoggerDelegate logger = new Log4jLogger(LogManager.getLogger("ModpackDirector"));
+    private final LoggerDelegate logger = makeLogger();
+
     private final ModpackDirector director;
 
     private List<String> args;
@@ -147,6 +149,15 @@ public class ModpackDirectorTweaker implements ITweaker, PlatformDelegate {
     @Override
     public boolean headless() {
         return GraphicsEnvironment.isHeadless();
+    }
+
+    private LoggerDelegate makeLogger() {
+        try {
+            return new Log4jLogger(LogManager.getLogger("ModpackDirector"));
+        } catch (Throwable ignored) {
+            // Either a really old minecraft version or log4j is plain missing?
+            return new JavaLogger(java.util.logging.Logger.getLogger("ModpackDirector"));
+        }
     }
 }
 
