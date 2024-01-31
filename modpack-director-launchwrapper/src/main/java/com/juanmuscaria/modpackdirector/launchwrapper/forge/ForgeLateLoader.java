@@ -1,7 +1,7 @@
-package com.juanmuscaria.modpackdirector.launcherwrapper.forge;
+package com.juanmuscaria.modpackdirector.launchwrapper.forge;
 
 import com.juanmuscaria.modpackdirector.ModpackDirector;
-import com.juanmuscaria.modpackdirector.launcherwrapper.ModpackDirectorTweaker;
+import com.juanmuscaria.modpackdirector.launchwrapper.ModpackDirectorTweaker;
 import net.jan.moddirector.core.manage.ModDirectorError;
 import net.jan.moddirector.core.manage.install.InstalledMod;
 import net.minecraft.launchwrapper.ITweaker;

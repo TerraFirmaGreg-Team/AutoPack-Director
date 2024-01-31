@@ -1,4 +1,4 @@
-package com.juanmuscaria.modpackdirector.launcherwrapper.forge;
+package com.juanmuscaria.modpackdirector.launchwrapper.forge;
 
 public class ForgeConstants {
     public static final String COREMODS_LOAD_PROPERTY = "fml.coreMods.load";

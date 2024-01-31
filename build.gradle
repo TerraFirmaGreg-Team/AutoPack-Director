@@ -35,7 +35,6 @@ allprojects {
             }
         }
 
-
         // Jabel stuff, compile with new java features while targeting java 8
         dependencies {
             annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.4.2'

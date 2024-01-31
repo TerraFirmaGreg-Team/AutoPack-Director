@@ -21,8 +21,9 @@ launcher or copyright issues.
 ## Usage
 Modpack Director is distributed in three forms:
 * **Standalone**: Self contained executable, you can execute it as a normal application
-* **LauncherWrapper**: Bootstrap Modpack Director through LauncherWrapper, compatible with forge from 1.6.4 to 1.12.2
+* **LaunchWrapper**: Bootstrap Modpack Director through LaunchWrapper, compatible with forge from 1.6.4 to 1.12.2
 * **ModLauncher**: Bootstrap Modpack Director through ModLauncher, compatible with (neo)forge from 1.13.2 to latest
+* **Universal**: Combine all distributions and bootstrap methods inside the same jar for convenience, compatible with every thing above
 
 At the core, all distributions are exactly the same application,
 being means to start the mod as early as possible in the game lifecycle.
@@ -34,7 +35,6 @@ For configuring the mod, please visit our [wiki](https://github.com/juanmuscaria
 * Modrinth download support
 * Fabric Loader support
 * File patching
-* Universal jar
 * User defined UI themes
 * Multi-language support
 * Rework configuration

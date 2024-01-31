@@ -1,19 +1,12 @@
 plugins {
-    id 'java-library'
+    id 'application'
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
-repositories {
-    maven {
-        name = 'minecraft'
-        url = 'https://libraries.minecraft.net'
-    }
-}
-
 dependencies {
-    implementation project(":")
-    //noinspection VulnerableLibrariesLocal launcher wrapper uses some nasty old libraries, launcher should have them patched however
-    compileOnly 'net.minecraft:launchwrapper:1.12'
+    implementation project(":modpack-director-standalone")
+    implementation project(":modpack-director-modlauncher")
+    implementation project(":modpack-director-launchwrapper")
 }
 
 jar {
@@ -24,7 +17,7 @@ jar {
                 "Specification-Title"   : "ModDirector",
                 "Specification-Vendor"  : "Janrupf",
                 "Specification-Version" : 1,
-                "Implementation-Title"  : "ModpackDirectorLaunchwrapper",
+                "Implementation-Title"  : "ModpackDirectorUniversal",
                 "Implementation-Vendor" : "juanmuscaria",
                 "Implementation-Version": archiveVersion.get()
         ])
@@ -37,4 +30,8 @@ build {
 
 shadowJar {
     exclude('META-INF/versions/**')
+}
+
+application {
+    mainClass = 'net.jan.moddirector.standalone.ModDirectorStandalone'
 }

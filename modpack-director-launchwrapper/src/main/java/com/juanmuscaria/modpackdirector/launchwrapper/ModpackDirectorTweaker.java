@@ -1,7 +1,7 @@
-package com.juanmuscaria.modpackdirector.launcherwrapper;
+package com.juanmuscaria.modpackdirector.launchwrapper;
 
 import com.juanmuscaria.modpackdirector.ModpackDirector;
-import com.juanmuscaria.modpackdirector.launcherwrapper.forge.ForgeLateLoader;
+import com.juanmuscaria.modpackdirector.launchwrapper.forge.ForgeLateLoader;
 import com.juanmuscaria.modpackdirector.logging.JavaLogger;
 import com.juanmuscaria.modpackdirector.logging.LoggerDelegate;
 import com.juanmuscaria.modpackdirector.util.PlatformDelegate;
