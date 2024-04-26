@@ -44,7 +44,7 @@ For configuring the mod, please visit our [wiki](https://github.com/juanmuscaria
 ## Credits
 * [File Director](https://github.com/TerraFirmaCraft-The-Final-Frontier/FileDirector) - File Processing Features
 * [Mod Director](https://github.com/Janrupf/mod-director) - Original Project
-* [Material UI Swing](https://github.com/vincenzopalazzo/material-ui-swing) - UI Theming
+* [FlatLaf](https://github.com/JFormDesigner/FlatLaf) - UI Theming
 
 ## Demo
 ![Modpack Director in action](demo.webp)

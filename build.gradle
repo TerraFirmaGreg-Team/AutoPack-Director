@@ -11,9 +11,7 @@ dependencies {
     implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.13.5"
 
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:233.13135.104'
-    implementation ('io.github.vincenzopalazzo:material-ui-swing:1.1.2') {
-        exclude(group: 'org.swinglabs')
-    }
+    implementation 'com.formdev:flatlaf:3.4.1'
 }
 
 allprojects {
