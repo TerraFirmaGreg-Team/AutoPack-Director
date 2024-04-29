@@ -1,5 +1,6 @@
 package com.juanmuscaria.modpackdirector;
 
+import com.juanmuscaria.autumn.messages.MessageSourceSupport;
 import com.juanmuscaria.modpackdirector.i18n.Messages;
 import com.juanmuscaria.modpackdirector.logging.LoggerDelegate;
 import com.juanmuscaria.modpackdirector.ui.DirectorMainGUI;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Getter
 public class ModpackDirector implements Callable<Boolean> {
@@ -66,6 +68,8 @@ public class ModpackDirector implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
+        var log = Logger.getLogger(MessageSourceSupport.class.getName());
+        log.setLevel(Level.FINEST);
         configurationController.load();
         List<ModDirectorRemoteMod> mods = configurationController.getConfigurations();
         ModpackConfiguration modpackConfiguration = configurationController.getModpackConfiguration();
@@ -142,6 +146,11 @@ public class ModpackDirector implements Callable<Boolean> {
         }
 
         List<InstallableMod> toInstall = installSelector.computeModsToInstall();
+        if (ui != null && !toInstall.isEmpty()) {
+            var consent = ui.consent(toInstall);
+            consent.waitForNext();
+        }
+
         var installProgressPage = ui == null ? null :
             ui.progressPage("modpack_director.progress.install", modpackConfiguration.packName());
 

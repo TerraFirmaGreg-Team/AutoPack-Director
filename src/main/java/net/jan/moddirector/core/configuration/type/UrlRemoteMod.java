@@ -3,6 +3,7 @@ package net.jan.moddirector.core.configuration.type;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.juanmuscaria.modpackdirector.ModpackDirector;
+import lombok.Getter;
 import net.jan.moddirector.core.configuration.InstallationPolicy;
 import net.jan.moddirector.core.configuration.ModDirectorRemoteMod;
 import net.jan.moddirector.core.configuration.RemoteModInformation;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+@Getter
 public class UrlRemoteMod extends ModDirectorRemoteMod {
     private final String fileName;
     private final URL url;

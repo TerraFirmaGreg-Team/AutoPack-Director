@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.juanmuscaria.modpackdirector.ModpackDirector;
+import lombok.Getter;
 import net.jan.moddirector.core.configuration.*;
 import net.jan.moddirector.core.exception.ModDirectorException;
 import net.jan.moddirector.core.manage.ProgressCallback;
@@ -24,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+@Getter
 public class CurseRemoteMod extends ModDirectorRemoteMod {
     private final int addonId;
     private final int fileId;
@@ -98,7 +100,8 @@ public class CurseRemoteMod extends ModDirectorRemoteMod {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class CurseAddonFileInformation {
+    @Getter
+    public static class CurseAddonFileInformation {
         @JsonProperty
         private String displayName;
 

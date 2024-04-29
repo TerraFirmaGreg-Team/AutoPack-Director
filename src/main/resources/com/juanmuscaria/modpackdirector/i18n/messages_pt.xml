@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>Use this file to overwrite UI texts</comment>
+    <entry key="modpack_director.modpack_outdated_refuse_launch.button">Fechar</entry>
+    <entry key="modpack_director.selection_page.title">Selecione mods para instalar</entry>
+    <entry key="modpack_director.selection_page.next_button_label">Próximo</entry>
+    <entry key="modpack_director.progress.install">Instalando %s</entry>
+    <entry key="modpack_director.restart_required">Instalação concluída, reinicie seu jogo para poder iniciar o
+        modpack.
+    </entry>
+    <entry key="modpack_director.progress.check_install">Verificando instalação...</entry>
+    <entry key="modpack_director.restart_required.button">Reiniciar</entry>
+    <entry key="modpack_director.selection_page.install">Instalar</entry>
+</properties>
