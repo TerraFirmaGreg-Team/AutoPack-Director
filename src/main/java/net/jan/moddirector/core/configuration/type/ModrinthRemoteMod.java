@@ -25,18 +25,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
-@Getter
-public class CurseRemoteMod extends ModDirectorRemoteMod {
-    private final int addonId;
-    private final int fileId;
-    private final String fileName;
+public class ModrinthRemoteMod extends ModDirectorRemoteMod {
+    private static final String MODRINTH_API_VERSIONS_URL = "https://api.modrinth.com/v2/version/%s";
 
-    private CurseAddonFileInformation information;
+    private final String versionId;
+    private final int fileIndex;
+    private final String fileName;
+    private ModrinthFileInformation information;
 
     @JsonCreator
-    public CurseRemoteMod(
-        @JsonProperty(value = "addonId", required = true) int addonId,
-        @JsonProperty(value = "fileId", required = true) int fileId,
+    public ModrinthRemoteMod(
+        @JsonProperty(value = "versionId", required = true) String versionId,
+        @JsonProperty(value = "fileIndex") int fileIndex,
         @JsonProperty(value = "metadata") RemoteModMetadata metadata,
         @JsonProperty(value = "installationPolicy") InstallationPolicy installationPolicy,
         @JsonProperty(value = "options") Map<String, Object> options,
@@ -45,30 +45,59 @@ public class CurseRemoteMod extends ModDirectorRemoteMod {
         @JsonProperty(value = "fileName") String fileName
     ) {
         super(metadata, installationPolicy, options, folder, inject);
-        this.addonId = addonId;
-        this.fileId = fileId;
+        this.versionId = versionId;
+        this.fileIndex = fileIndex;
         this.fileName = fileName;
     }
 
     @Override
     public String remoteType() {
-        return "CurseForge";
+        return "Modrinth";
     }
 
     @Override
     public String offlineName() {
-        return addonId + ":" + fileId;
+        return versionId;
     }
 
     @Override
     public String remoteUrl() {
-        return information.getDownloadUrl().toString();
+        return information.getUrl().toString();
+    }
+
+    @Override
+    public RemoteModInformation queryInformation() throws ModDirectorException {
+        try {
+            URL apiUrl = new URL(String.format(MODRINTH_API_VERSIONS_URL, versionId));
+            WebGetResponse response = WebClient.get(apiUrl);
+            JsonNode jsonObject;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
+                jsonObject = ConfigurationController.OBJECT_MAPPER.readTree(reader).get("files").get(fileIndex);
+            }
+            if (jsonObject == null) {
+                throw new ModDirectorException("No such file at index " + fileIndex);
+            }
+            information = ConfigurationController.OBJECT_MAPPER.convertValue(jsonObject, ModrinthFileInformation.class);
+        } catch (MalformedURLException e) {
+            throw new ModDirectorException("Failed to create modrinth api url", e);
+        } catch (JsonParseException e) {
+            throw new ModDirectorException("Failed to parse Json response from modrinth", e);
+        } catch (JsonMappingException e) {
+            throw new ModDirectorException("Failed to map Json response from modrinth, did they change their api?", e);
+        } catch (IOException e) {
+            throw new ModDirectorException("Failed to open connection to modrinth", e);
+        }
+
+        if (fileName != null) {
+            return new RemoteModInformation(fileName, fileName);
+        } else {
+            return new RemoteModInformation(information.filename, information.filename);
+        }
     }
 
     @Override
     public void performInstall(Path targetFile, ProgressCallback progressCallback, ModpackDirector director, RemoteModInformation information) throws ModDirectorException {
-
-        try (WebGetResponse response = WebClient.get(this.information.downloadUrl)) {
+        try (WebGetResponse response = WebClient.get(this.information.getUrl())) {
             progressCallback.setSteps(1);
             IOOperation.copy(response.getInputStream(), Files.newOutputStream(targetFile), progressCallback,
                 response.getStreamSize());
@@ -77,46 +106,13 @@ public class CurseRemoteMod extends ModDirectorRemoteMod {
         }
     }
 
-    @Override
-    public RemoteModInformation queryInformation() throws ModDirectorException {
-        try {
-            URL apiUrl = new URL(String.format("https://api.curse.tools/v1/cf/mods/%s/files/%s", addonId, fileId));
-            WebGetResponse response = WebClient.get(apiUrl);
-            JsonNode jsonObject;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
-                jsonObject = ConfigurationController.OBJECT_MAPPER.readTree(reader).get("data");
-            }
-            information = ConfigurationController.OBJECT_MAPPER.convertValue(jsonObject, CurseAddonFileInformation.class);
-        } catch (MalformedURLException e) {
-            throw new ModDirectorException("Failed to create curse.tools api url", e);
-        } catch (JsonParseException e) {
-            throw new ModDirectorException("Failed to parse Json response from curse", e);
-        } catch (JsonMappingException e) {
-            throw new ModDirectorException("Failed to map Json response from curse, did they change their api?", e);
-        } catch (IOException e) {
-            throw new ModDirectorException("Failed to open connection to curse", e);
-        }
-
-        if (fileName != null) {
-            return new RemoteModInformation(fileName, fileName);
-        } else {
-            return new RemoteModInformation(information.displayName, information.fileName);
-        }
-    }
-
     @JsonIgnoreProperties(ignoreUnknown = true)
     @Getter
-    public static class CurseAddonFileInformation {
+    public static class ModrinthFileInformation {
         @JsonProperty
-        private String displayName;
+        private String filename;
 
         @JsonProperty
-        private String fileName;
-
-        @JsonProperty
-        private URL downloadUrl;
-
-        @JsonProperty
-        private String[] gameVersions;
+        private URL url;
     }
 }

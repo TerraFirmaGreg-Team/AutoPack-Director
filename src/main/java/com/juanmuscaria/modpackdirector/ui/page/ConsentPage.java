@@ -50,16 +50,10 @@ public class ConsentPage extends JPanel {
         modPane.setLayout(new BoxLayout(modPane, BoxLayout.Y_AXIS));
 
         modPane.add(new JLabel(asHtml(mod.getRemoteInformation().displayName())));
-        if (mod.getRemoteMod() instanceof UrlRemoteMod url) {
-            modPane.add(new JLabel(asHtml(url.getUrl().toString())));
-        } else if (mod.getRemoteMod() instanceof CurseRemoteMod curse) {
-            modPane.add(new JLabel(asHtml(curse.getInformation().getDownloadUrl().toString())));
-        }
+        modPane.add(new JLabel(asHtml(mod.getRemoteMod().remoteUrl())));
 
         modPane.add(new JLabel(asHtml(mod.getTargetFile().toString())));
-        var sourceName = mod.getRemoteMod() instanceof CurseRemoteMod
-            ? messages.get("modpack_director.consent.source.curseforge")
-            : messages.get("modpack_director.consent.source.unknow");
+        var sourceName = messages.get("modpack_director.consent.source", mod.getRemoteMod().remoteType());
 
         modPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED), sourceName, TitledBorder.CENTER, TitledBorder.TOP));
 

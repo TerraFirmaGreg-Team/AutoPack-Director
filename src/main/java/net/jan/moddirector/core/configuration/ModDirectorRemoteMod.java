@@ -48,6 +48,8 @@ public abstract class ModDirectorRemoteMod {
 
     public abstract String offlineName();
 
+    public abstract String remoteUrl();
+
     public abstract RemoteModInformation queryInformation() throws ModDirectorException;
 
     public abstract void performInstall(Path targetFile, ProgressCallback progressCallback, ModpackDirector director,

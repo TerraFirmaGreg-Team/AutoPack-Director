@@ -52,7 +52,7 @@ public class UrlRemoteMod extends ModDirectorRemoteMod {
 
     @Override
     public String remoteType() {
-        return url.toExternalForm();
+        return url.getHost();
     }
 
     @Override
@@ -60,6 +60,12 @@ public class UrlRemoteMod extends ModDirectorRemoteMod {
         return url.getFile().isEmpty() ? "<no name>" : url.getFile();
     }
 
+    @Override
+    public String remoteUrl() {
+        return url.toString();
+    }
+
+    // TODO: Move URL following to query instead
     @Override
     public void performInstall(Path targetFile, ProgressCallback progressCallback, ModpackDirector director, RemoteModInformation information) throws ModDirectorException {
         byte[] data = null;
