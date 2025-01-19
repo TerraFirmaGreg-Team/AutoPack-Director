@@ -1,6 +1,6 @@
 package net.jan.moddirector.core.manage.install;
 
-import com.juanmuscaria.modpackdirector.ModpackDirector;
+import net.jan.moddirector.ModpackDirector;
 import net.jan.moddirector.core.configuration.ModDirectorRemoteMod;
 import net.jan.moddirector.core.configuration.RemoteModInformation;
 import net.jan.moddirector.core.exception.ModDirectorException;

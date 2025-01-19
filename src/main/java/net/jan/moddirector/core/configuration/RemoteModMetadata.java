@@ -2,8 +2,8 @@ package net.jan.moddirector.core.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.juanmuscaria.modpackdirector.util.PlatformDelegate;
-import com.juanmuscaria.modpackdirector.util.Side;
+import net.jan.moddirector.util.PlatformDelegate;
+import net.jan.moddirector.util.Side;
 import net.jan.moddirector.core.util.HashResult;
 
 import java.io.IOException;
