@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.jan.moddirector.ModpackDirector;
+import com.juanmuscaria.modpackdirector.ModpackDirector;
 import lombok.Getter;
 import net.jan.moddirector.core.configuration.modpack.ModpackConfiguration;
 import net.jan.moddirector.core.configuration.type.*;

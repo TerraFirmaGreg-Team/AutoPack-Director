@@ -2,7 +2,7 @@ package net.jan.moddirector.core.configuration.type;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import net.jan.moddirector.ModpackDirector;
+import com.juanmuscaria.modpackdirector.ModpackDirector;
 import lombok.Getter;
 import net.jan.moddirector.core.configuration.InstallationPolicy;
 import net.jan.moddirector.core.configuration.ModDirectorRemoteMod;

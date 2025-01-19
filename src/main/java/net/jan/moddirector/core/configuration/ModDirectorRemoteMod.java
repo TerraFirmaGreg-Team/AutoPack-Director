@@ -1,6 +1,6 @@
 package net.jan.moddirector.core.configuration;
 
-import net.jan.moddirector.ModpackDirector;
+import com.juanmuscaria.modpackdirector.ModpackDirector;
 import net.jan.moddirector.core.exception.ModDirectorException;
 import net.jan.moddirector.core.manage.ProgressCallback;
 
