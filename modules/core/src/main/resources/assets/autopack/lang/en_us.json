@@ -17,5 +17,13 @@
   "autopack.dialog.outdated.button": "Ok",
   "autopack.dialog.outdated_blocked.title": "Modpack Outdated",
   "autopack.dialog.outdated_blocked.message": "Your modpack version does not match the latest remote version. Please update before launching the game.",
-  "autopack.dialog.outdated_blocked.button": "Close"
+  "autopack.dialog.outdated_blocked.button": "Close",
+  "autopack.pakku.config.title": "Sync configs with pakku-lock?",
+  "autopack.pakku.config.message": "pakku-lock.json has single-platform mods with missing or outdated AutoPack-Director configs. Synchronize config/mod-director?",
+  "autopack.pakku.mods.title": "Download missing mods?",
+  "autopack.pakku.mods.message": "Some files listed in pakku-lock.json are missing from mods/. Download them now?",
+  "autopack.pakku.yes": "Yes",
+  "autopack.pakku.no": "No",
+  "autopack.pakku.cancel": "Cancel and Exit",
+  "autopack.progress.pakku_download": "Downloading missing mods from pakku-lock..."
 }

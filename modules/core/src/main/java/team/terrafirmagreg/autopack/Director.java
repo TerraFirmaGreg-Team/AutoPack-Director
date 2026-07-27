@@ -18,6 +18,11 @@ import team.terrafirmagreg.autopack.core.manage.check.StopModReposts;
 import team.terrafirmagreg.autopack.core.manage.install.InstallableMod;
 import team.terrafirmagreg.autopack.core.manage.install.InstalledMod;
 import team.terrafirmagreg.autopack.core.manage.select.InstallSelector;
+import team.terrafirmagreg.autopack.core.pakku.PakkuConfigChange;
+import team.terrafirmagreg.autopack.core.pakku.PakkuDiff;
+import team.terrafirmagreg.autopack.core.pakku.PakkuLockDiffer;
+import team.terrafirmagreg.autopack.core.pakku.PakkuLockSync;
+import team.terrafirmagreg.autopack.core.pakku.PakkuMissingMod;
 import team.terrafirmagreg.autopack.core.util.ImageLoader;
 import team.terrafirmagreg.autopack.core.util.NetworkExceptions;
 import team.terrafirmagreg.autopack.core.util.WebClient;
@@ -35,6 +40,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,31 +100,14 @@ public class Director implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        configurationController.load();
-        List<RemoteMod> mods = configurationController.getConfigurations();
-        ModpackConfiguration modpackConfiguration = configurationController.getModpackConfiguration();
+        PakkuDiff pakkuDiff = PakkuLockDiffer.detect(
+            platform.installationRoot(),
+            platform.configurationDirectory(),
+            logger
+        );
 
-        if (modpackConfiguration == null) {
-            logger.warn("This modpack does not contain a modpack.json, if you are the author, consider adding one!");
-            modpackConfiguration = ModpackConfiguration.createDefault();
-        } else if (modpackConfiguration.remoteVersion() != null) {
-            try (WebGetResponse response = WebClient.get(modpackConfiguration.remoteVersion());
-                 BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
-                modpackRemoteVersion = reader.readLine();
-            } catch (IOException e) {
-                String detail = NetworkExceptions.describe(e);
-                logger.error("Failed to check modpack version from {0}: {1}",
-                    modpackConfiguration.remoteVersion(), detail, e);
-                addError(new InstallError(Level.SEVERE,
-                    "Failed to check the modpack version from " + modpackConfiguration.remoteVersion()
-                        + ": " + detail, e));
-            }
-        }
+        ModpackConfiguration modpackConfiguration = readBootstrapModpackConfiguration();
         UITheme.apply(modpackConfiguration.uiTheme(), logger);
-
-        if (hasFatalError()) {
-            return false;
-        }
 
         var messages = new Messages(platform);
         if (!platform.headless()) {
@@ -145,6 +134,35 @@ public class Director implements Callable<Boolean> {
             ui.setTitle(modpackConfiguration.packName());
             ui.pack();
             ui.setVisible(true);
+        }
+
+        handlePakkuDiff(pakkuDiff);
+
+        configurationController.load();
+        List<RemoteMod> mods = configurationController.getConfigurations();
+        if (configurationController.getModpackConfiguration() != null) {
+            modpackConfiguration = configurationController.getModpackConfiguration();
+        } else {
+            logger.warn("This modpack does not contain a modpack.json, if you are the author, consider adding one!");
+            modpackConfiguration = ModpackConfiguration.createDefault();
+        }
+
+        if (modpackConfiguration.remoteVersion() != null) {
+            try (WebGetResponse response = WebClient.get(modpackConfiguration.remoteVersion());
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
+                modpackRemoteVersion = reader.readLine();
+            } catch (IOException e) {
+                String detail = NetworkExceptions.describe(e);
+                logger.error("Failed to check modpack version from {0}: {1}",
+                    modpackConfiguration.remoteVersion(), detail, e);
+                addError(new InstallError(Level.SEVERE,
+                    "Failed to check the modpack version from " + modpackConfiguration.remoteVersion()
+                        + ": " + detail, e));
+            }
+        }
+
+        if (hasFatalError()) {
+            return false;
         }
 
         var preInstallationPage = ui == null ? null
@@ -246,6 +264,85 @@ public class Director implements Callable<Boolean> {
 
     public boolean hasFatalError() {
         return errors.stream().anyMatch(e -> e.getLevel() == Level.SEVERE);
+    }
+
+    private ModpackConfiguration readBootstrapModpackConfiguration() {
+        Path modpackConfigPath = platform.configurationDirectory().resolve("modpack.json");
+        if (!Files.isRegularFile(modpackConfigPath)) {
+            return ModpackConfiguration.createDefault();
+        }
+        try (InputStream stream = Files.newInputStream(modpackConfigPath)) {
+            return ConfigurationController.OBJECT_MAPPER.readValue(stream, ModpackConfiguration.class);
+        } catch (IOException e) {
+            logger.warn("Failed to read modpack.json for UI bootstrap: {0}", e.getMessage());
+            return ModpackConfiguration.createDefault();
+        }
+    }
+
+    private void handlePakkuDiff(PakkuDiff diff) throws InterruptedException {
+        if (diff == null || diff.isEmpty()) {
+            return;
+        }
+
+        if (diff.hasConfigDrift()) {
+            if (ui == null) {
+                logger.warn("pakku-lock config drift detected ({0} changes) but skipped in headless mode",
+                    diff.getConfigUpdates().size());
+            } else {
+                List<String> entries = new ArrayList<>();
+                for (PakkuConfigChange change : diff.getConfigUpdates()) {
+                    entries.add(change.summary());
+                }
+                boolean sync = ui.pakkuPrompt(
+                    "autopack.pakku.config.title",
+                    "autopack.pakku.config.message",
+                    entries
+                ).waitForAnswer();
+                if (sync) {
+                    try {
+                        PakkuLockSync.applyConfigs(diff, logger);
+                    } catch (IOException e) {
+                        logger.error("Failed to sync configs from pakku-lock", e);
+                        addError(new InstallError(Level.SEVERE, "Failed to sync configs from pakku-lock", e));
+                    }
+                } else {
+                    logger.info("User declined pakku-lock config sync");
+                }
+            }
+        }
+
+        if (diff.hasMissingMods()) {
+            if (ui == null) {
+                logger.warn("pakku-lock missing mods detected ({0} files) but skipped in headless mode",
+                    diff.getMissingMods().size());
+            } else {
+                List<String> entries = new ArrayList<>();
+                for (PakkuMissingMod missing : diff.getMissingMods()) {
+                    entries.add(missing.summary());
+                }
+                boolean download = ui.pakkuPrompt(
+                    "autopack.pakku.mods.title",
+                    "autopack.pakku.mods.message",
+                    entries
+                ).waitForAnswer();
+                if (download) {
+                    var progressPage = ui.progressPage("autopack.progress.pakku_download");
+                    try {
+                        PakkuLockSync.fetchMissingMods(
+                            diff,
+                            platform.installationRoot().resolve("mods"),
+                            progressPage.createProgressCallback("pakku", "Downloading"),
+                            logger
+                        );
+                    } catch (IOException e) {
+                        logger.error("Failed to download missing mods from pakku-lock", e);
+                        addError(new InstallError(Level.SEVERE, "Failed to download missing mods from pakku-lock", e));
+                    }
+                } else {
+                    logger.info("User declined downloading missing mods from pakku-lock");
+                }
+            }
+        }
     }
 
     private ProgressCallback noOpCallback(String title, String info) {

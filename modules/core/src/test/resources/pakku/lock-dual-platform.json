@@ -1,0 +1,22 @@
+{
+  "mc_versions": ["1.20.1"],
+  "loaders": { "forge": "47.4.13" },
+  "projects": [
+    {
+      "type": "MOD",
+      "slug": { "curseforge": "aaa-particles", "modrinth": "aaa-particles" },
+      "name": { "curseforge": "AAA Particles", "modrinth": "AAA Particles" },
+      "id": { "curseforge": "979809", "modrinth": "En8uHTOK" },
+      "files": [
+        {
+          "type": "modrinth",
+          "file_name": "aaa.jar",
+          "mc_versions": ["1.20.1"],
+          "loaders": ["forge"],
+          "id": "9cBh3Vh8",
+          "url": "https://example.com/aaa.jar"
+        }
+      ]
+    }
+  ]
+}

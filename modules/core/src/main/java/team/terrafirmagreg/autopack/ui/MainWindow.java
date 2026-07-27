@@ -8,6 +8,7 @@ import team.terrafirmagreg.autopack.ui.page.ConsentPage;
 import team.terrafirmagreg.autopack.ui.page.ErrorPage;
 import team.terrafirmagreg.autopack.ui.page.MessagePage;
 import team.terrafirmagreg.autopack.ui.page.ModSelectionPage;
+import team.terrafirmagreg.autopack.ui.page.PakkuPromptPage;
 import team.terrafirmagreg.autopack.ui.page.ProgressPage;
 import team.terrafirmagreg.autopack.ui.theme.UITheme;
 import lombok.Getter;
@@ -55,6 +56,10 @@ public class MainWindow extends JFrame {
 
     public MessagePage messagePage(String titleKey, String messageKey, String buttonKey) {
         return setCurrentPage(new MessagePage(messages, titleKey, messageKey, buttonKey));
+    }
+
+    public PakkuPromptPage pakkuPrompt(String titleKey, String messageKey, List<String> entries) {
+        return setCurrentPage(new PakkuPromptPage(messages, titleKey, messageKey, entries));
     }
 
     public ErrorPage errorPage(Collection<InstallError> errors) {

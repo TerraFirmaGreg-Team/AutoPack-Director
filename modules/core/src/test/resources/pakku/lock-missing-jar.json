@@ -1,0 +1,22 @@
+{
+  "mc_versions": ["1.20.1"],
+  "loaders": { "forge": "47.4.13" },
+  "projects": [
+    {
+      "type": "MOD",
+      "slug": { "curseforge": "placebo" },
+      "name": { "curseforge": "Placebo" },
+      "id": { "curseforge": "283644" },
+      "files": [
+        {
+          "type": "curseforge",
+          "file_name": "Placebo-1.20.1-8.6.3.jar",
+          "mc_versions": ["1.20.1"],
+          "loaders": ["forge"],
+          "id": "6274231",
+          "url": "https://example.com/placebo.jar"
+        }
+      ]
+    }
+  ]
+}

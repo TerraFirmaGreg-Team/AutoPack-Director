@@ -1,0 +1,22 @@
+{
+  "mc_versions": ["1.20.1"],
+  "loaders": { "forge": "47.4.13" },
+  "projects": [
+    {
+      "type": "MOD",
+      "slug": { "modrinth": "cc-tweaked" },
+      "name": { "modrinth": "CC: Tweaked" },
+      "id": { "modrinth": "gu7yAYhd" },
+      "files": [
+        {
+          "type": "modrinth",
+          "file_name": "cc-tweaked.jar",
+          "mc_versions": ["1.20.1"],
+          "loaders": ["forge"],
+          "id": "OMIJHNkd",
+          "url": "https://example.com/cc.jar"
+        }
+      ]
+    }
+  ]
+}
