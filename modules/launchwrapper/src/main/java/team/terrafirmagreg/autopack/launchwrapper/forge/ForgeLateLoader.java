@@ -269,9 +269,9 @@ public class ForgeLateLoader {
     }
 
     private void handle(InstalledMod mod) {
-        Path injectedFile = mod.getFile();
+        Path injectedFile = mod.file();
 
-        if (!mod.shouldInject()) {
+        if (!mod.inject()) {
             return;
         }
 

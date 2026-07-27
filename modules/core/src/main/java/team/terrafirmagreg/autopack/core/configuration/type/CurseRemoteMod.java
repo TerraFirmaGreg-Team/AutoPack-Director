@@ -1,14 +1,14 @@
 package team.terrafirmagreg.autopack.core.configuration.type;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import team.terrafirmagreg.autopack.Director;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 import team.terrafirmagreg.autopack.core.configuration.*;
 import team.terrafirmagreg.autopack.core.exception.InstallException;
 import team.terrafirmagreg.autopack.core.manage.ProgressCallback;
@@ -24,33 +24,21 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
+@Jacksonized
+@SuperBuilder
 @Getter
 public class CurseRemoteMod extends RemoteMod {
+    @JsonProperty(required = true)
     private final int addonId;
+
+    @JsonProperty(required = true)
     private final int fileId;
+
+    @JsonProperty
     private final String fileName;
 
     private CurseAddonFileInformation information;
-
-    @JsonCreator
-    @Builder
-    public CurseRemoteMod(
-        @JsonProperty(value = "addonId", required = true) int addonId,
-        @JsonProperty(value = "fileId", required = true) int fileId,
-        @JsonProperty(value = "metadata") RemoteModMetadata metadata,
-        @JsonProperty(value = "installationPolicy") InstallationPolicy installationPolicy,
-        @JsonProperty(value = "options") Map<String, Object> options,
-        @JsonProperty(value = "folder") String folder,
-        @JsonProperty(value = "inject") Boolean inject,
-        @JsonProperty(value = "fileName") String fileName
-    ) {
-        super(metadata, installationPolicy, options, folder, inject);
-        this.addonId = addonId;
-        this.fileId = fileId;
-        this.fileName = fileName;
-    }
 
     @Override
     public String remoteType() {

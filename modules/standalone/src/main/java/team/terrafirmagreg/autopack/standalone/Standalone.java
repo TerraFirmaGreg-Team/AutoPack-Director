@@ -15,8 +15,8 @@ public class Standalone {
         System.out.println("Installed mods summary:");
         System.out.println("============================================================");
         director.getInstalledMods().forEach((mod) -> {
-            System.out.println(mod.getFile() + (mod.shouldInject() ? " has been injected" : " has not been injected"));
-            mod.getOptions().forEach((key, value) -> System.out.println("- " + key + ": " + value));
+            System.out.println(mod.file() + (mod.inject() ? " has been injected" : " has not been injected"));
+            mod.options().forEach((key, value) -> System.out.println("- " + key + ": " + value));
         });
         System.out.println("============================================================");
     }

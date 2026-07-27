@@ -1,8 +1,8 @@
 package team.terrafirmagreg.autopack.core.configuration;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
+import lombok.extern.jackson.Jacksonized;
 import team.terrafirmagreg.autopack.util.PlatformDelegate;
 import team.terrafirmagreg.autopack.util.Side;
 import team.terrafirmagreg.autopack.core.util.HashResult;
@@ -16,19 +16,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Jacksonized
+@Builder
 public class RemoteModMetadata {
-    private final Map<String, String> hashes;
-    private final Side side;
+    @JsonProperty("hash")
+    private final LinkedHashMap<String, String> hashes;
 
-    @JsonCreator
-    @Builder
-    public RemoteModMetadata(
-        @JsonProperty(value = "hash") LinkedHashMap<String, String> hashes,
-        @JsonProperty(value = "side") Side side
-    ) {
-        this.hashes = hashes;
-        this.side = side;
-    }
+    @JsonProperty
+    private final Side side;
 
     public HashResult checkHashes(Path file, PlatformDelegate platform) {
         if (hashes == null) {

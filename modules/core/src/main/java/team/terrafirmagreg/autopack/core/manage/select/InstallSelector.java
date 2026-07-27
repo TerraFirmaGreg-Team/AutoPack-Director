@@ -1,5 +1,6 @@
 package team.terrafirmagreg.autopack.core.manage.select;
 
+import lombok.Getter;
 import team.terrafirmagreg.autopack.core.configuration.InstallationPolicy;
 import team.terrafirmagreg.autopack.core.configuration.RemoteMod;
 import team.terrafirmagreg.autopack.core.manage.install.InstallableMod;
@@ -9,11 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Getter
 public class InstallSelector {
     private final List<InstallableMod> alwaysInstall;
     private final List<SelectableInstallOption> singleOptions;
     private final Map<String, List<SelectableInstallOption>> groupOptions;
-
     private final Map<SelectableInstallOption, InstallableMod> optionsToMod;
 
     public InstallSelector() {
@@ -33,7 +34,7 @@ public class InstallSelector {
         for (RemoteMod mod : excludedMods) {
             InstallationPolicy policy = mod.getInstallationPolicy();
             if (policy != null) {
-                String group = policy.getOptionalKey();
+                String group = policy.optionalKey();
                 if (group != null && !group.equals("$")) {
                     ignoredGroups.add(group);
                 }
@@ -41,11 +42,11 @@ public class InstallSelector {
         }
 
         for (InstallableMod mod : reInstall) {
-            RemoteMod remoteMod = mod.getRemoteMod();
+            RemoteMod remoteMod = mod.remoteMod();
             if (remoteMod != null) {
                 InstallationPolicy policy = remoteMod.getInstallationPolicy();
                 if (policy != null) {
-                    String group = policy.getOptionalKey();
+                    String group = policy.optionalKey();
                     if (group != null && !group.equals("$")) {
                         ignoredGroups.add(group);
                     }
@@ -55,18 +56,18 @@ public class InstallSelector {
         }
 
         for (InstallableMod mod : freshInstalls) {
-            RemoteMod remoteMod = mod.getRemoteMod();
+            RemoteMod remoteMod = mod.remoteMod();
             if (remoteMod != null) {
                 InstallationPolicy policy = remoteMod.getInstallationPolicy();
                 if (policy != null) {
-                    String optionalKey = policy.getOptionalKey();
+                    String optionalKey = policy.optionalKey();
                     if (optionalKey == null) {
                         alwaysInstall.add(mod);
                     } else if (!ignoredGroups.contains(optionalKey)) {
                         SelectableInstallOption installOption = new SelectableInstallOption(
                             policy.isSelectedByDefault(),
-                            policy.getName() == null ? remoteMod.offlineName() : policy.getName(),
-                            policy.getDescription()
+                            policy.name() == null ? remoteMod.offlineName() : policy.name(),
+                            policy.description()
                         );
                         if (optionalKey.equals("$")) {
                             singleOptions.add(installOption);
@@ -82,14 +83,6 @@ public class InstallSelector {
 
     public boolean hasSelectableOptions() {
         return !getSingleOptions().isEmpty() || !getGroupOptions().isEmpty();
-    }
-
-    public List<SelectableInstallOption> getSingleOptions() {
-        return singleOptions;
-    }
-
-    public Map<String, List<SelectableInstallOption>> getGroupOptions() {
-        return groupOptions;
     }
 
     public List<InstallableMod> computeModsToInstall() {

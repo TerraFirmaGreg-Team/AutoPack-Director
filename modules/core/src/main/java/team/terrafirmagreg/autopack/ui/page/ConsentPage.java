@@ -5,8 +5,6 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import team.terrafirmagreg.autopack.UnsafeExit;
 import team.terrafirmagreg.autopack.i18n.Messages;
 import team.terrafirmagreg.autopack.ui.components.ScrollablePane;
-import team.terrafirmagreg.autopack.core.configuration.type.CurseRemoteMod;
-import team.terrafirmagreg.autopack.core.configuration.type.UrlRemoteMod;
 import team.terrafirmagreg.autopack.core.manage.install.InstallableMod;
 
 import javax.swing.*;
@@ -49,11 +47,11 @@ public class ConsentPage extends JPanel {
         var modPane = new JPanel();
         modPane.setLayout(new BoxLayout(modPane, BoxLayout.Y_AXIS));
 
-        modPane.add(new JLabel(asHtml(mod.getRemoteInformation().displayName())));
-        modPane.add(new JLabel(asHtml(mod.getRemoteMod().remoteUrl())));
+        modPane.add(new JLabel(asHtml(mod.remoteInformation().displayName())));
+        modPane.add(new JLabel(asHtml(mod.remoteMod().remoteUrl())));
 
-        modPane.add(new JLabel(asHtml(mod.getTargetFile().toString())));
-        var sourceName = messages.get("modpack_director.consent.source", mod.getRemoteMod().remoteType());
+        modPane.add(new JLabel(asHtml(mod.targetFile().toString())));
+        var sourceName = messages.get("modpack_director.consent.source", mod.remoteMod().remoteType());
 
         modPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED), sourceName, TitledBorder.CENTER, TitledBorder.TOP));
 

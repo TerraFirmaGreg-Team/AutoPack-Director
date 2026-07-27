@@ -1,15 +1,17 @@
 package team.terrafirmagreg.autopack.core.configuration.type;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.Builder;
-import team.terrafirmagreg.autopack.Director;
 import lombok.Getter;
-import team.terrafirmagreg.autopack.core.configuration.*;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
+import team.terrafirmagreg.autopack.Director;
+import team.terrafirmagreg.autopack.core.configuration.ConfigurationController;
+import team.terrafirmagreg.autopack.core.configuration.RemoteMod;
+import team.terrafirmagreg.autopack.core.configuration.RemoteModInformation;
 import team.terrafirmagreg.autopack.core.exception.InstallException;
 import team.terrafirmagreg.autopack.core.manage.ProgressCallback;
 import team.terrafirmagreg.autopack.core.util.IOOperation;
@@ -24,33 +26,21 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
+@Jacksonized
+@SuperBuilder
 public class ModrinthRemoteMod extends RemoteMod {
     private static final String MODRINTH_API_VERSIONS_URL = "https://api.modrinth.com/v2/version/%s";
 
+    @JsonProperty(required = true)
     private final String versionId;
+
+    @JsonProperty
     private final int fileIndex;
+
+    @JsonProperty
     private final String fileName;
     private ModrinthFileInformation information;
-
-    @JsonCreator
-    @Builder
-    public ModrinthRemoteMod(
-        @JsonProperty(value = "versionId", required = true) String versionId,
-        @JsonProperty(value = "fileIndex") int fileIndex,
-        @JsonProperty(value = "metadata") RemoteModMetadata metadata,
-        @JsonProperty(value = "installationPolicy") InstallationPolicy installationPolicy,
-        @JsonProperty(value = "options") Map<String, Object> options,
-        @JsonProperty(value = "folder") String folder,
-        @JsonProperty(value = "inject") Boolean inject,
-        @JsonProperty(value = "fileName") String fileName
-    ) {
-        super(metadata, installationPolicy, options, folder, inject);
-        this.versionId = versionId;
-        this.fileIndex = fileIndex;
-        this.fileName = fileName;
-    }
 
     @Override
     public String remoteType() {

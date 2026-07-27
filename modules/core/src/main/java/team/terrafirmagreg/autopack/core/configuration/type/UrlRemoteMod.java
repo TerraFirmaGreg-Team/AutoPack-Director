@@ -1,14 +1,13 @@
 package team.terrafirmagreg.autopack.core.configuration.type;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import team.terrafirmagreg.autopack.Director;
 import lombok.Builder;
 import lombok.Getter;
-import team.terrafirmagreg.autopack.core.configuration.InstallationPolicy;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 import team.terrafirmagreg.autopack.core.configuration.RemoteMod;
 import team.terrafirmagreg.autopack.core.configuration.RemoteModInformation;
-import team.terrafirmagreg.autopack.core.configuration.RemoteModMetadata;
 import team.terrafirmagreg.autopack.core.exception.InstallException;
 import team.terrafirmagreg.autopack.core.manage.ProgressCallback;
 import team.terrafirmagreg.autopack.core.util.IOOperation;
@@ -24,33 +23,22 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+@Jacksonized
+@SuperBuilder
 @Getter
 public class UrlRemoteMod extends RemoteMod {
+    @JsonProperty
     private final String fileName;
-    private final URL url;
-    private final String[] follows;
 
-    @JsonCreator
-    @Builder
-    public UrlRemoteMod(
-        @JsonProperty(value = "fileName") String fileName,
-        @JsonProperty(value = "url", required = true) URL url,
-        @JsonProperty(value = "follows") String[] follows,
-        @JsonProperty(value = "metadata") RemoteModMetadata metadata,
-        @JsonProperty(value = "installationPolicy") InstallationPolicy installationPolicy,
-        @JsonProperty(value = "options") Map<String, Object> options,
-        @JsonProperty(value = "folder") String folder,
-        @JsonProperty(value = "inject") Boolean inject
-    ) {
-        super(metadata, installationPolicy, options, folder, inject);
-        this.fileName = fileName;
-        this.url = url;
-        this.follows = follows == null ? new String[0] : follows;
-    }
+    @JsonProperty(required = true)
+    private final URL url;
+
+    @JsonProperty
+    @Builder.Default
+    private final String[] follows = new String[0];
 
     @Override
     public String remoteType() {
@@ -104,7 +92,7 @@ public class UrlRemoteMod extends RemoteMod {
         try {
             Files.write(targetFile, data);
 
-            if (this.getInstallationPolicy().shouldExtract()) {
+            if (this.getInstallationPolicy().extract()) {
                 try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(data))) {
                     byte[] buffer = new byte[8192];
                     ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -131,7 +119,7 @@ public class UrlRemoteMod extends RemoteMod {
                         zipEntry = zipInputStream.getNextEntry();
                     }
                 }
-                if (this.getInstallationPolicy().shouldDeleteAfterExtract()) {
+                if (this.getInstallationPolicy().deleteAfterExtract()) {
                     Files.delete(targetFile);
                 }
             }

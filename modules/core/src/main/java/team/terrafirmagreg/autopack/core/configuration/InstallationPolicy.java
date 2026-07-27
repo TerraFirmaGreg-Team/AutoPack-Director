@@ -1,84 +1,62 @@
 package team.terrafirmagreg.autopack.core.configuration;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.Accessors;
+import lombok.extern.jackson.Jacksonized;
 
 import java.util.Collections;
 import java.util.List;
 
+@Jacksonized
+@Builder
+@Getter
+@Accessors(fluent = true)
 public class InstallationPolicy {
+    @JsonProperty
     private final boolean continueOnFailedDownload;
-    @Getter
+
+    @JsonProperty
     private final String optionalKey;
-    @Getter
-    private final boolean selectedByDefault;
-    @Getter
+
+    @Getter(AccessLevel.NONE)
+    @JsonProperty("selectedByDefault")
+    private final Boolean selectedByDefault;
+
+    @JsonProperty
     private final String name;
-    @Getter
+
+    @JsonProperty
     private final String description;
+
+    @JsonProperty
     private final boolean extract;
+
+    @JsonProperty
     private final boolean deleteAfterExtract;
+
+    @JsonProperty
     private final boolean downloadAlways;
+
+    @JsonProperty
     private final String supersede;
+
+    @JsonProperty
     private final List<String> supersedes;
-    @Getter
+
+    @JsonProperty
     private final boolean deleteSuperseded;
-    @Getter
+
+    @JsonProperty
     private final String modpackVersion;
 
-    @JsonCreator
-    @Builder
-    public InstallationPolicy(
-        @JsonProperty(value = "continueOnFailedDownload") boolean continueOnFailedDownload,
-        @JsonProperty(value = "optionalKey") String optionalKey,
-        @JsonProperty(value = "selectedByDefault") Boolean selectedByDefault,
-        @JsonProperty(value = "name") String name,
-        @JsonProperty(value = "description") String description,
-        @JsonProperty(value = "extract") boolean extract,
-        @JsonProperty(value = "deleteAfterExtract") boolean deleteAfterExtract,
-        @JsonProperty(value = "downloadAlways") boolean downloadAlways,
-        @JsonProperty(value = "supersede") String supersede,
-        @JsonProperty(value = "supersedes") List<String> supersedes,
-        @JsonProperty(value = "deleteSuperseded") boolean deleteSuperseded,
-        @JsonProperty(value = "modpackVersion") String modpackVersion
-    ) {
-        this.continueOnFailedDownload = continueOnFailedDownload;
-        this.optionalKey = optionalKey;
-        this.selectedByDefault = selectedByDefault != null ? selectedByDefault : optionalKey != null;
-        this.name = name;
-        this.description = description;
-        this.extract = extract;
-        this.deleteAfterExtract = deleteAfterExtract;
-        this.downloadAlways = downloadAlways;
-        this.supersede = supersede;
-        this.supersedes = supersedes;
-        this.deleteSuperseded = deleteSuperseded;
-        this.modpackVersion = modpackVersion;
+    public boolean isSelectedByDefault() {
+        return selectedByDefault != null ? selectedByDefault : optionalKey != null;
     }
 
-    public boolean shouldContinueOnFailedDownload() {
-        return continueOnFailedDownload;
-    }
-
-    public boolean shouldExtract() {
-        return extract;
-    }
-
-    public boolean shouldDeleteAfterExtract() {
-        return deleteAfterExtract;
-    }
-
-    public boolean shouldDownloadAlways() {
-        return downloadAlways;
-    }
-
-    public String getSupersededFileName() {
-        return supersede;
-    }
-
-    public List<String> getAllSupersedePatterns() {
+    public List<String> allSupersedePatterns() {
         if (supersedes != null && !supersedes.isEmpty()) {
             return supersedes;
         }
@@ -87,5 +65,4 @@ public class InstallationPolicy {
         }
         return Collections.emptyList();
     }
-
 }

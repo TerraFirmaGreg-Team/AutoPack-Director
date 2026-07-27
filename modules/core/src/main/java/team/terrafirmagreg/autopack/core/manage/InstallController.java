@@ -33,7 +33,7 @@ public class InstallController {
     }
 
     private Level downloadSeverityLevelFor(RemoteMod mod) {
-        return mod.getInstallationPolicy().shouldContinueOnFailedDownload() ?
+        return mod.getInstallationPolicy().continueOnFailedDownload() ?
             Level.WARNING : Level.SEVERE;
     }
 
@@ -134,7 +134,7 @@ public class InstallController {
                     Files.deleteIfExists(bansoukouDisabledFile);
                     reinstallMods.add(installableMod);
 
-                } else if (mod.getInstallationPolicy().shouldDownloadAlways() && Files.isRegularFile(targetFile)) {
+                } else if (mod.getInstallationPolicy().downloadAlways() && Files.isRegularFile(targetFile)) {
                     director.logger().info("Force downloading file {0} as download always option is set.",
                         targetFile.toString());
                     reinstallMods.add(installableMod);
@@ -149,7 +149,7 @@ public class InstallController {
                 }
 
                 if (!excludedMods.contains(mod)) {
-                    List<String> patterns = mod.getInstallationPolicy().getAllSupersedePatterns();
+                    List<String> patterns = mod.getInstallationPolicy().allSupersedePatterns();
                     if (!patterns.isEmpty()) {
                         Path targetDir = targetFile.getParent();
                         FileSystem fs = targetDir.getFileSystem();
@@ -163,7 +163,7 @@ public class InstallController {
                                 .filter(p -> matchers.stream().anyMatch(m -> m.matches(p.getFileName())))
                                 .forEach(old -> {
                                     try {
-                                        if (mod.getInstallationPolicy().isDeleteSuperseded()) {
+                                        if (mod.getInstallationPolicy().deleteSuperseded()) {
                                             Files.delete(old);
                                             director.logger().info("Deleted superseded file {0}", old);
                                         } else {
@@ -225,7 +225,7 @@ public class InstallController {
     }
 
     private boolean isVersionCompliant(RemoteMod mod) {
-        String versionMod = mod.getInstallationPolicy().getModpackVersion();
+        String versionMod = mod.getInstallationPolicy().modpackVersion();
         String versionModpackRemote = director.getModpackRemoteVersion();
 
         ModpackConfiguration modpackConfiguration = director.getConfigurationController().getModpackConfiguration();
@@ -247,7 +247,7 @@ public class InstallController {
     public void markDisabledMods(List<InstallableMod> mods) {
         for (InstallableMod mod : mods) {
             try {
-                Path disabledFile = computeDisabledPath(mod.getTargetFile());
+                Path disabledFile = computeDisabledPath(mod.targetFile());
 
                 Files.createDirectories(disabledFile.getParent());
                 Files.createFile(disabledFile);
@@ -273,7 +273,7 @@ public class InstallController {
 
         for (InstallableMod mod : mods) {
             installTasks.add(() -> {
-                handle(mod, callbackFactory.apply(mod.getRemoteInformation().targetFilename(), "Installing"));
+                handle(mod, callbackFactory.apply(mod.remoteInformation().targetFilename(), "Installing"));
                 return null;
             });
         }
@@ -283,11 +283,11 @@ public class InstallController {
 
     private void handle(InstallableMod mod, ProgressCallback callback) {
         try {
-            RemoteMod remoteMod = mod.getRemoteMod();
+            RemoteMod remoteMod = mod.remoteMod();
 
             director.logger().debug("Now handling {0} from backend {1}}", remoteMod.offlineName(), remoteMod.remoteType());
 
-            Path targetFile = mod.getTargetFile();
+            Path targetFile = mod.targetFile();
 
             try {
                 Files.createDirectories(targetFile.getParent());
@@ -314,7 +314,7 @@ public class InstallController {
                 director.addError(new InstallError(Level.SEVERE,
                     "Mod did not match hash after download"));
             } else {
-                if (remoteMod.getInstallationPolicy().shouldExtract()) {
+                if (remoteMod.getInstallationPolicy().extract()) {
                     director.logger().info("Extracted mod file {0}", targetFile.toString());
                 } else {
                     director.logger().info("Installed mod file {0}", targetFile.toString());

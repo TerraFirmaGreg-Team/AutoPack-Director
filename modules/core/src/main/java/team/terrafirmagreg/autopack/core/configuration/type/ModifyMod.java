@@ -1,54 +1,31 @@
 package team.terrafirmagreg.autopack.core.configuration.type;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+import lombok.extern.jackson.Jacksonized;
 
+@Jacksonized
+@Builder
+@Getter
+@Accessors(fluent = true)
 public class ModifyMod {
+    @JsonProperty
     private final String fileName;
+
+    @JsonProperty(required = true)
     private final String folder;
+
+    @JsonProperty
     private final boolean disable;
+
+    @JsonProperty
     private final boolean delete;
+
+    @JsonProperty
     private final String newFolder;
+
+    @JsonProperty
     private final String newFileName;
-
-    @JsonCreator
-    public ModifyMod(
-        @JsonProperty(value = "fileName") String fileName,
-        @JsonProperty(value = "folder", required = true) String folder,
-        @JsonProperty(value = "disable") boolean disable,
-        @JsonProperty(value = "delete") boolean delete,
-        @JsonProperty(value = "newFolder") String newFolder,
-        @JsonProperty(value = "newFileName") String newFileName
-    ) {
-        this.fileName = fileName;
-        this.folder = folder;
-        this.disable = disable;
-        this.delete = delete;
-        this.newFolder = newFolder;
-        this.newFileName = newFileName;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public String getFolder() {
-        return folder;
-    }
-
-    public boolean shouldDisable() {
-        return disable;
-    }
-
-    public boolean shouldDelete() {
-        return delete;
-    }
-
-    public String getNewFolder() {
-        return newFolder;
-    }
-
-    public String getNewFileName() {
-        return newFileName;
-    }
 }

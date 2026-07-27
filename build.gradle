@@ -28,8 +28,8 @@ allprojects {
         // Jabel stuff, compile with new java features while targeting java 8
         dependencies {
             annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.4.2'
-            annotationProcessor 'org.projectlombok:lombok:1.18.30'
-            compileOnly 'org.projectlombok:lombok:1.18.30'
+            annotationProcessor 'org.projectlombok:lombok:1.18.46'
+            compileOnly 'org.projectlombok:lombok:1.18.46'
             testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
             testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
         }

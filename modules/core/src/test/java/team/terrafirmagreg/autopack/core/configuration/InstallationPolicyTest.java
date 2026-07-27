@@ -20,7 +20,7 @@ class InstallationPolicyTest {
             .supersedes(patterns)
             .build();
 
-        assertEquals(patterns, policy.getAllSupersedePatterns());
+        assertEquals(patterns, policy.allSupersedePatterns());
     }
 
     @Test
@@ -30,14 +30,14 @@ class InstallationPolicyTest {
             .supersedes(Collections.emptyList())
             .build();
 
-        assertEquals(Collections.singletonList("single.jar"), policy.getAllSupersedePatterns());
+        assertEquals(Collections.singletonList("single.jar"), policy.allSupersedePatterns());
     }
 
     @Test
     void noSupersedeReturnsEmptyList() {
         InstallationPolicy policy = InstallationPolicy.builder().build();
 
-        assertTrue(policy.getAllSupersedePatterns().isEmpty());
+        assertTrue(policy.allSupersedePatterns().isEmpty());
     }
 
     @Test
@@ -69,6 +69,6 @@ class InstallationPolicyTest {
             .continueOnFailedDownload(true)
             .build();
 
-        assertTrue(policy.shouldContinueOnFailedDownload());
+        assertTrue(policy.continueOnFailedDownload());
     }
 }

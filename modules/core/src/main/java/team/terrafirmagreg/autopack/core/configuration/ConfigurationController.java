@@ -116,28 +116,28 @@ public class ConfigurationController {
             var jsonArray = jsonTree.get("curse");
             if (jsonArray != null && jsonArray.isArray()) {
                 for (JsonNode jsonNode : jsonArray) {
-                    configurations.add(OBJECT_MAPPER.convertValue(jsonNode, CurseRemoteMod.class));
+                    configurations.add(OBJECT_MAPPER.treeToValue(jsonNode, CurseRemoteMod.class));
                 }
             }
 
             jsonArray = jsonTree.get("modrinth");
             if (jsonArray != null && jsonArray.isArray()) {
                 for (JsonNode jsonNode : jsonArray) {
-                    configurations.add(OBJECT_MAPPER.convertValue(jsonNode, ModrinthRemoteMod.class));
+                    configurations.add(OBJECT_MAPPER.treeToValue(jsonNode, ModrinthRemoteMod.class));
                 }
             }
 
             jsonArray = jsonTree.get("url");
             if (jsonArray != null && jsonArray.isArray()) {
                 for (JsonNode jsonNode : jsonArray) {
-                    configurations.add(OBJECT_MAPPER.convertValue(jsonNode, UrlRemoteMod.class));
+                    configurations.add(OBJECT_MAPPER.treeToValue(jsonNode, UrlRemoteMod.class));
                 }
             }
 
             jsonArray = jsonTree.get("modify");
             if (jsonArray != null && jsonArray.isArray()) {
                 for (JsonNode jsonNode : jsonArray) {
-                    handleModifyConfig(OBJECT_MAPPER.convertValue(jsonNode, ModifyMod.class));
+                    handleModifyConfig(OBJECT_MAPPER.treeToValue(jsonNode, ModifyMod.class));
                 }
             }
         } catch (IOException e) {
@@ -168,9 +168,9 @@ public class ConfigurationController {
     private void handleModifyConfig(ModifyMod modifyMod) {
         try {
             Path installationRoot = director.getPlatform().installationRoot().toAbsolutePath().normalize();
-            Path modifyModFolderPath = installationRoot.resolve(modifyMod.getFolder());
-            if (modifyMod.getFileName() == null) {
-                if (Files.isDirectory(modifyModFolderPath) && modifyMod.shouldDelete()) {
+            Path modifyModFolderPath = installationRoot.resolve(modifyMod.folder());
+            if (modifyMod.fileName() == null) {
+                if (Files.isDirectory(modifyModFolderPath) && modifyMod.delete()) {
                     director.getLogger().info("Deleting folder {0}", modifyModFolderPath);
                     try (Stream<Path> paths = Files.walk(modifyModFolderPath)) {
                         paths.sorted(Comparator.reverseOrder()).forEach(path -> {
@@ -183,27 +183,27 @@ public class ConfigurationController {
                     }
                 }
             } else {
-                Path modifyModFilePath = modifyModFolderPath.resolve(modifyMod.getFileName());
+                Path modifyModFilePath = modifyModFolderPath.resolve(modifyMod.fileName());
                 if (Files.isRegularFile(modifyModFilePath)) {
-                    if (modifyMod.shouldDisable()) {
+                    if (modifyMod.disable()) {
                         director.getLogger().info("Disabling file {0}", modifyModFilePath);
-                        Files.move(modifyModFilePath, modifyModFilePath.resolveSibling(modifyMod.getFileName() + ".disabled-by-mod-director"));
-                    } else if (modifyMod.shouldDelete()) {
+                        Files.move(modifyModFilePath, modifyModFilePath.resolveSibling(modifyMod.fileName() + ".disabled-by-mod-director"));
+                    } else if (modifyMod.delete()) {
                         director.getLogger().info("Deleting file {0}", modifyModFilePath);
                         Files.delete(modifyModFilePath);
                     } else {
                         Path modifyModNewFilePath = null;
-                        if (modifyMod.getNewFolder() != null) {
+                        if (modifyMod.newFolder() != null) {
                             director.getLogger().info("Moving file {0}", modifyModFilePath);
-                            modifyModFolderPath = installationRoot.resolve(modifyMod.getNewFolder());
+                            modifyModFolderPath = installationRoot.resolve(modifyMod.newFolder());
                             Files.createDirectories(modifyModFolderPath);
-                            modifyModNewFilePath = modifyModFolderPath.resolve(modifyMod.getFileName());
+                            modifyModNewFilePath = modifyModFolderPath.resolve(modifyMod.fileName());
                         }
-                        if (modifyMod.getNewFileName() != null) {
+                        if (modifyMod.newFileName() != null) {
                             director.getLogger().info("Renaming file {0}", modifyModFilePath);
                             modifyModNewFilePath = modifyModNewFilePath != null // Moved before?
-                                ? modifyModNewFilePath.resolveSibling(modifyMod.getNewFileName()) // Yes -> Use new folder
-                                : modifyModFilePath.resolveSibling(modifyMod.getNewFileName()); // No -> Use old folder
+                                ? modifyModNewFilePath.resolveSibling(modifyMod.newFileName()) // Yes -> Use new folder
+                                : modifyModFilePath.resolveSibling(modifyMod.newFileName()); // No -> Use old folder
                         }
                         if (modifyModNewFilePath != null) {
                             if (Files.exists(modifyModNewFilePath)) {
