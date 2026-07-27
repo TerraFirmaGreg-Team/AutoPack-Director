@@ -1,4 +1,7 @@
-# Pack Director
+# AutoPack-Director
+
+[![CurseForge Downloads](https://img.shields.io/curseforge/dt/1182657?style=flat-square&logo=curseforge&logoColor=white&label=CurseForge)](https://www.curseforge.com/minecraft/mc-mods/autopack-director)
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/autopack-director?style=flat-square&logo=modrinth&logoColor=white&label=Modrinth)](https://modrinth.com/mod/autopack-director)
 
 This is a fork of ModpackDirector (juanmuscaria), which in turn is a fork of FileDirector (TerraFirmaCraft-The-Final-Frontier), which is a fork of mod-director (Janrupf)
 

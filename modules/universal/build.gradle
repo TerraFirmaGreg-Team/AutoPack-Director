@@ -1,0 +1,47 @@
+plugins {
+    id 'application'
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+}
+
+dependencies {
+    implementation project(":standalone")
+    implementation project(":modlauncher")
+    implementation project(":launchwrapper")
+
+    // Jackson is included to ensure it's available at runtime
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-core", version: '2.15.0'
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.13.5"
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.13.5"
+}
+
+jar {
+    manifest {
+        attributes([
+                "TweakClass"            : "team.terrafirmagreg.autopack.launchwrapper.Tweaker",
+                "TweakOrder"            : Integer.MIN_VALUE,
+                "Specification-Title"   : "AutoPack-Director",
+                "Specification-Vendor"  : "TerraFirmaGreg-Team",
+                "Specification-Version" : 1,
+                "Implementation-Title"  : "AutoPack-Director",
+                "Implementation-Vendor" : "TerraFirmaGreg-Team",
+                "Implementation-Version": archiveVersion.get()
+        ])
+    }
+}
+
+build {
+    dependsOn(shadowJar)
+}
+
+shadowJar {
+    archiveBaseName = 'AutoPack-Director'
+    archiveClassifier.set('')
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir('libs'))
+    exclude('META-INF/versions/**')
+    mergeServiceFiles()
+    relocate('com.fasterxml.jackson', 'team.terrafirmagreg.autopack.shadow.jackson')
+}
+
+application {
+    mainClass = 'team.terrafirmagreg.autopack.standalone.Standalone'
+}

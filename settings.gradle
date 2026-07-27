@@ -1,6 +1,6 @@
 rootProject.name = 'AutoPack-Director'
 
-include 'standalone'
-include 'launchwrapper'
-include 'modlauncher'
-include 'universal'
+['core', 'standalone', 'launchwrapper', 'modlauncher', 'universal'].each { name ->
+    include name
+    project(":$name").projectDir = file("modules/$name")
+}

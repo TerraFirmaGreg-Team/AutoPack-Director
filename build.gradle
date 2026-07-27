@@ -1,20 +1,5 @@
-plugins {
-    id 'java-library'
-}
-
-group 'com.juanmuscaria'
-version '1.3.0'
-
-dependencies {
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-core", version: '2.15.0'
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.13.5"
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.13.5"
-
-    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:233.13135.104'
-    implementation 'com.formdev:flatlaf:3.4.1'
-    implementation 'com.juanmuscaria:autumn-messages:1.1-SNAPSHOT'
-    implementation 'com.juanmuscaria:autumn-resources:1.1-SNAPSHOT'
-}
+group 'team.terrafirmagreg'
+version '1.4.0'
 
 allprojects {
     group = rootProject.group
@@ -32,7 +17,6 @@ allprojects {
                 url = "https://github.com/juanmuscaria/maven/raw/master"
                 metadataSources.ignoreGradleMetadataRedirection()
             }
-
         }
 
         configurations {
@@ -45,6 +29,8 @@ allprojects {
         dependencies {
             annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.4.2'
             annotationProcessor 'org.projectlombok:lombok:1.18.30'
+            testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+            testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
         }
 
         configure([tasks.compileJava]) {
@@ -61,11 +47,11 @@ allprojects {
         }
 
         test {
+            useJUnitPlatform()
             javaLauncher = javaToolchains.launcherFor {
                 languageVersion = JavaLanguageVersion.of(8)
             }
         }
-
     }
 
     pluginManager.withPlugin('application') {

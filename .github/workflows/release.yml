@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Build
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/libs/AutoPack-Director-*.jar
+          generate_release_notes: true
+
+      - name: Publish to CurseForge & Modrinth
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-id: 1587715
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          modrinth-id: 2JWWdEgd
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          files: build/libs/AutoPack-Director-*.jar
+          name: Contents Director ${{ github.ref_name }}
+          version: ${{ github.ref_name }}
+          loaders: forge
+          game-versions: ">=1.7.10"

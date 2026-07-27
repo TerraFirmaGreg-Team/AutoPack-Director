@@ -3,3 +3,6 @@
 build/
 run/
 out/
+*.class
+*.jar
+**/bin/

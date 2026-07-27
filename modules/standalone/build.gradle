@@ -1,0 +1,20 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':core')
+}
+
+application {
+    mainClass = 'team.terrafirmagreg.autopack.standalone.Standalone'
+}
+
+run {
+    def runDir = file("run")
+    if (!runDir.exists() && !runDir.mkdirs()) {
+        throw new IllegalAccessException("Failed to create run directory ${runDir.getAbsolutePath()}")
+    }
+
+    workingDir runDir
+}
