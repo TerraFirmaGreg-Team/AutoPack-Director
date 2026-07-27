@@ -42,6 +42,10 @@ allprojects {
             sourceCompatibility = targetCompatibility = 8
         }
 
+        tasks.withType(JavaCompile).configureEach {
+            options.encoding = 'UTF-8'
+        }
+
         test {
             useJUnitPlatform()
             javaLauncher = javaToolchains.launcherFor {
