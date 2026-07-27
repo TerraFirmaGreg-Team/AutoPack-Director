@@ -1,0 +1,27 @@
+{
+  "curse": [
+    {
+      "addonId": 1,
+      "fileId": 2
+    }
+  ],
+  "modrinth": [
+    {
+      "versionId": "version-1",
+      "fileIndex": 0
+    }
+  ],
+  "url": [
+    {
+      "url": "https://example.com/bundle-mod.jar",
+      "fileName": "bundle-mod.jar"
+    }
+  ],
+  "modify": [
+    {
+      "fileName": "old-mod.jar",
+      "folder": "mods",
+      "disable": true
+    }
+  ]
+}

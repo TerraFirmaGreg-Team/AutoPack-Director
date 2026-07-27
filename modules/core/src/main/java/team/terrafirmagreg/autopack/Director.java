@@ -61,12 +61,16 @@ public class Director implements Callable<Boolean> {
     private MainWindow ui;
 
     public Director(PlatformDelegate platform) {
+        this(platform, true);
+    }
+
+    public Director(PlatformDelegate platform, boolean fetchStopModReposts) {
         this.platform = platform;
         this.logger = platform.logger();
         this.prevLookAndFeel = UIManager.getLookAndFeel();
         this.configurationController = new ConfigurationController(this, platform.configurationDirectory());
         this.installController = new InstallController(this);
-        this.stopModReposts = new StopModReposts(this);
+        this.stopModReposts = new StopModReposts(this, fetchStopModReposts);
     }
 
     @Override

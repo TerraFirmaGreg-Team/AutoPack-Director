@@ -2,6 +2,7 @@ package team.terrafirmagreg.autopack.core.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import team.terrafirmagreg.autopack.util.PlatformDelegate;
 import team.terrafirmagreg.autopack.util.Side;
 import team.terrafirmagreg.autopack.core.util.HashResult;
@@ -20,6 +21,7 @@ public class RemoteModMetadata {
     private final Side side;
 
     @JsonCreator
+    @Builder
     public RemoteModMetadata(
         @JsonProperty(value = "hash") LinkedHashMap<String, String> hashes,
         @JsonProperty(value = "side") Side side

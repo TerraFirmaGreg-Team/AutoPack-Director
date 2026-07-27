@@ -23,20 +23,7 @@ public abstract class RemoteMod {
         Boolean inject
     ) {
         this.metadata = metadata;
-        this.installationPolicy = installationPolicy == null ? new InstallationPolicy(
-            false,
-            null,
-            null,
-            null,
-            null,
-            false,
-            false,
-            false,
-            null,
-            null,
-            false,
-            null
-        ) : installationPolicy;
+        this.installationPolicy = installationPolicy == null ? InstallationPolicy.builder().build() : installationPolicy;
         this.options = options == null ? Collections.emptyMap() : options;
         this.folder = folder;
         if (inject == null) {

@@ -2,25 +2,34 @@ package team.terrafirmagreg.autopack.core.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.util.Collections;
 import java.util.List;
 
 public class InstallationPolicy {
     private final boolean continueOnFailedDownload;
+    @Getter
     private final String optionalKey;
+    @Getter
     private final boolean selectedByDefault;
+    @Getter
     private final String name;
+    @Getter
     private final String description;
     private final boolean extract;
     private final boolean deleteAfterExtract;
     private final boolean downloadAlways;
     private final String supersede;
     private final List<String> supersedes;
+    @Getter
     private final boolean deleteSuperseded;
+    @Getter
     private final String modpackVersion;
 
     @JsonCreator
+    @Builder
     public InstallationPolicy(
         @JsonProperty(value = "continueOnFailedDownload") boolean continueOnFailedDownload,
         @JsonProperty(value = "optionalKey") String optionalKey,
@@ -53,22 +62,6 @@ public class InstallationPolicy {
         return continueOnFailedDownload;
     }
 
-    public String getOptionalKey() {
-        return optionalKey;
-    }
-
-    public boolean isSelectedByDefault() {
-        return selectedByDefault;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
     public boolean shouldExtract() {
         return extract;
     }
@@ -95,11 +88,4 @@ public class InstallationPolicy {
         return Collections.emptyList();
     }
 
-    public boolean isDeleteSuperseded() {
-        return deleteSuperseded;
-    }
-
-    public String getModpackVersion() {
-        return modpackVersion;
-    }
 }

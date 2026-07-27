@@ -3,6 +3,7 @@ package team.terrafirmagreg.autopack.core.configuration.type;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import team.terrafirmagreg.autopack.Director;
+import lombok.Builder;
 import lombok.Getter;
 import team.terrafirmagreg.autopack.core.configuration.InstallationPolicy;
 import team.terrafirmagreg.autopack.core.configuration.RemoteMod;
@@ -34,6 +35,7 @@ public class UrlRemoteMod extends RemoteMod {
     private final String[] follows;
 
     @JsonCreator
+    @Builder
     public UrlRemoteMod(
         @JsonProperty(value = "fileName") String fileName,
         @JsonProperty(value = "url", required = true) URL url,
@@ -77,36 +79,7 @@ public class UrlRemoteMod extends RemoteMod {
             if (i < 0) {
                 urlToFollow = url;
             } else {
-                String html = new String(data);
-
-                int startIndex = html.indexOf(follows[i]);
-                if (startIndex < 0) {
-                    throw new InstallException("Unable to find follow string " + follows[i] + " in html from " +
-                        urlToFollow);
-                }
-
-                int href = html.substring(0, startIndex).lastIndexOf("href=") + 5;
-                char hrefEnclose = html.charAt(href);
-                int hrefEnd = html.indexOf(hrefEnclose, href + 2);
-
-                String newUrl = html.substring(href + 1, hrefEnd);
-                if (newUrl.isEmpty()) {
-                    throw new InstallException("Result url was empty when matching " + follows[i] +
-                        " in html from " + urlToFollow);
-                }
-
-                try {
-                    if (!newUrl.startsWith("http://") && !newUrl.startsWith("https://")) {
-                        if (!newUrl.startsWith("/")) {
-                            newUrl = "/" + newUrl;
-                        }
-                        urlToFollow = new URL(urlToFollow.getProtocol(), urlToFollow.getHost(), newUrl);
-                    } else {
-                        urlToFollow = new URL(newUrl);
-                    }
-                } catch (MalformedURLException e) {
-                    throw new InstallException("Failed to create follow url when using follow " + follows[i], e);
-                }
+                urlToFollow = resolveFollowUrl(urlToFollow, new String(data), follows[i]);
             }
 
             if (i + 1 == follows.length) {
@@ -167,6 +140,36 @@ public class UrlRemoteMod extends RemoteMod {
         }
 
         progressCallback.done();
+    }
+
+    static URL resolveFollowUrl(URL currentUrl, String html, String followMarker) throws InstallException {
+        int startIndex = html.indexOf(followMarker);
+        if (startIndex < 0) {
+            throw new InstallException("Unable to find follow string " + followMarker + " in html from " +
+                currentUrl);
+        }
+
+        int href = html.substring(0, startIndex).lastIndexOf("href=") + 5;
+        char hrefEnclose = html.charAt(href);
+        int hrefEnd = html.indexOf(hrefEnclose, href + 2);
+
+        String newUrl = html.substring(href + 1, hrefEnd);
+        if (newUrl.isEmpty()) {
+            throw new InstallException("Result url was empty when matching " + followMarker +
+                " in html from " + currentUrl);
+        }
+
+        try {
+            if (!newUrl.startsWith("http://") && !newUrl.startsWith("https://")) {
+                if (!newUrl.startsWith("/")) {
+                    newUrl = "/" + newUrl;
+                }
+                return new URL(currentUrl.getProtocol(), currentUrl.getHost(), newUrl);
+            }
+            return new URL(newUrl);
+        } catch (MalformedURLException e) {
+            throw new InstallException("Failed to create follow url when using follow " + followMarker, e);
+        }
     }
 
     @Override

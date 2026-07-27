@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.Builder;
 import team.terrafirmagreg.autopack.Director;
 import lombok.Getter;
 import team.terrafirmagreg.autopack.core.configuration.*;
@@ -34,6 +35,7 @@ public class ModrinthRemoteMod extends RemoteMod {
     private ModrinthFileInformation information;
 
     @JsonCreator
+    @Builder
     public ModrinthRemoteMod(
         @JsonProperty(value = "versionId", required = true) String versionId,
         @JsonProperty(value = "fileIndex") int fileIndex,

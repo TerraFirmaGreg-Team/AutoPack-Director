@@ -18,7 +18,14 @@ public class StopModReposts {
     private final Director director;
 
     public StopModReposts(Director director) {
+        this(director, true);
+    }
+
+    public StopModReposts(Director director, boolean fetchEntries) {
         this.director = director;
+        if (!fetchEntries) {
+            return;
+        }
         try (WebGetResponse response =
                  WebClient.get(new URL("https://api.stopmodreposts.org/sites.json"))) {
             JavaType targetType = ConfigurationController.OBJECT_MAPPER.getTypeFactory().

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import team.terrafirmagreg.autopack.Director;
+import lombok.Builder;
 import lombok.Getter;
 import team.terrafirmagreg.autopack.core.configuration.*;
 import team.terrafirmagreg.autopack.core.exception.InstallException;
@@ -34,6 +35,7 @@ public class CurseRemoteMod extends RemoteMod {
     private CurseAddonFileInformation information;
 
     @JsonCreator
+    @Builder
     public CurseRemoteMod(
         @JsonProperty(value = "addonId", required = true) int addonId,
         @JsonProperty(value = "fileId", required = true) int fileId,
