@@ -29,10 +29,14 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -71,6 +75,23 @@ public class Director implements Callable<Boolean> {
         this.configurationController = new ConfigurationController(this, platform.configurationDirectory());
         this.installController = new InstallController(this);
         this.stopModReposts = new StopModReposts(this, fetchStopModReposts);
+        initializeTrustStore();
+    }
+
+    private void initializeTrustStore() {
+        try (InputStream is = Director.class.getResourceAsStream("/cacerts")) {
+            if (is == null) {
+                logger.warn("Unable to replace CA certificates: bundled trust store not found");
+                return;
+            }
+            File cacertsCopy = File.createTempFile("cacerts", "");
+            cacertsCopy.deleteOnExit();
+            Files.copy(is, cacertsCopy.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            System.setProperty("javax.net.ssl.trustStore", cacertsCopy.getAbsolutePath());
+            logger.info("Successfully replaced CA certificates with updated ones");
+        } catch (Exception e) {
+            logger.warn("Unable to replace CA certificates", e);
+        }
     }
 
     @Override

@@ -1,7 +1,5 @@
 package team.terrafirmagreg.autopack.core.configuration;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,9 +12,12 @@ import team.terrafirmagreg.autopack.core.util.IOOperation;
 import team.terrafirmagreg.autopack.core.util.JacksonProvider;
 import team.terrafirmagreg.autopack.core.util.WebClient;
 import team.terrafirmagreg.autopack.core.util.WebGetResponse;
+import team.terrafirmagreg.autopack.ui.WarningDisplay;
 
 import java.io.*;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -39,8 +40,6 @@ public class ConfigurationController {
         this.configurationDirectory = configurationDirectory;
         this.configurations = new ArrayList<>();
     }
-
-
 
     public void load() {
         Path modpackConfigPath = configurationDirectory.resolve("modpack.json");
@@ -90,6 +89,68 @@ public class ConfigurationController {
         }
     }
 
+    private void safeDelete(Path file) {
+        int attempts = 5;
+        while (attempts-- > 0) {
+            try {
+                Files.delete(file);
+                return;
+            } catch (FileSystemException e) {
+                if (attempts == 0) {
+                    String message = String.format("Could not delete file %s after multiple attempts: %s",
+                        file.getFileName(), e.getMessage());
+                    director.getLogger().warn(message);
+                    WarningDisplay.show("The mod \"" + file.getFileName() + "\" could not be deleted.\n\n" +
+                        "It may be locked by another process (e.g., Minecraft).\n\n" +
+                        "Press OK to continue.\n\nReason: " + e.getMessage());
+                    return;
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            } catch (IOException e) {
+                String message = String.format("Unexpected IO error deleting file %s: %s",
+                    file.getFileName(), e.getMessage());
+                director.getLogger().warn(message);
+                WarningDisplay.show("The mod \"" + file.getFileName() + "\" could not be deleted due to an unexpected error.\n\n" +
+                    "Press OK to continue.\n\nReason: " + e.getMessage());
+                return;
+            }
+        }
+    }
+
+    private void safeModify(FileOperation action, String contextDescription, Path sourcePath, Path targetPath) {
+        int attempts = 5;
+        while (attempts-- > 0) {
+            try {
+                action.run();
+                return;
+            } catch (IOException e) {
+                if (attempts == 0) {
+                    String message = String.format(
+                        "ERROR: Failed to perform operation: %s%n%nSource:%n  %s%n%nTarget:%n  %s%n%nReason:%n  %s",
+                        contextDescription,
+                        sourcePath,
+                        targetPath != null ? targetPath : "(unknown)",
+                        e.getMessage()
+                    );
+                    director.getLogger().warn(message);
+                    WarningDisplay.show(message);
+                    return;
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+        }
+    }
+
     private void handleRemoteConfig(Path configurationPath) {
         try (InputStream stream = Files.newInputStream(configurationPath)) {
             RemoteConfig remoteConfig = OBJECT_MAPPER.readValue(stream, RemoteConfig.class);
@@ -101,7 +162,10 @@ public class ConfigurationController {
                 Path remoteConfigPath = installationRoot.resolve(configurationDirectory).resolve(fileName);
                 Files.write(remoteConfigPath, outputStream.toByteArray());
                 addConfig(remoteConfigPath);
-                Files.delete(remoteConfigPath);
+                safeDelete(remoteConfigPath);
+            } catch (UnknownHostException e) {
+                director.getLogger().error("Failed to resolve URL {0}, skipping remote config...",
+                    remoteConfig.getUrl(), e);
             }
         } catch (IOException e) {
             handleConfigException(e);
@@ -166,61 +230,73 @@ public class ConfigurationController {
     }
 
     private void handleModifyConfig(ModifyMod modifyMod) {
-        try {
-            Path installationRoot = director.getPlatform().installationRoot().toAbsolutePath().normalize();
-            Path modifyModFolderPath = installationRoot.resolve(modifyMod.folder());
-            if (modifyMod.fileName() == null) {
-                if (Files.isDirectory(modifyModFolderPath) && modifyMod.delete()) {
-                    director.getLogger().info("Deleting folder {0}", modifyModFolderPath);
-                    try (Stream<Path> paths = Files.walk(modifyModFolderPath)) {
-                        paths.sorted(Comparator.reverseOrder()).forEach(path -> {
-                            try {
-                                Files.deleteIfExists(path);
-                            } catch (IOException e) {
-                                throw new UncheckedIOException(e);
-                            }
-                        });
-                    }
+        Path installationRoot = director.getPlatform().installationRoot().toAbsolutePath().normalize();
+        Path modifyModFolderPath = installationRoot.resolve(modifyMod.folder());
+
+        if (modifyMod.fileName() == null) {
+            if (Files.isDirectory(modifyModFolderPath) && modifyMod.delete()) {
+                director.getLogger().info("Deleting folder {0}", modifyModFolderPath);
+                try (Stream<Path> paths = Files.walk(modifyModFolderPath)) {
+                    paths.sorted(Comparator.reverseOrder()).forEach(path -> safeDelete(path));
+                } catch (IOException e) {
+                    handleConfigException(e);
                 }
-            } else {
-                Path modifyModFilePath = modifyModFolderPath.resolve(modifyMod.fileName());
-                if (Files.isRegularFile(modifyModFilePath)) {
-                    if (modifyMod.disable()) {
-                        director.getLogger().info("Disabling file {0}", modifyModFilePath);
-                        Files.move(modifyModFilePath, modifyModFilePath.resolveSibling(modifyMod.fileName() + ".disabled-by-mod-director"));
-                    } else if (modifyMod.delete()) {
-                        director.getLogger().info("Deleting file {0}", modifyModFilePath);
-                        Files.delete(modifyModFilePath);
-                    } else {
-                        Path modifyModNewFilePath = null;
-                        if (modifyMod.newFolder() != null) {
-                            director.getLogger().info("Moving file {0}", modifyModFilePath);
-                            modifyModFolderPath = installationRoot.resolve(modifyMod.newFolder());
-                            Files.createDirectories(modifyModFolderPath);
-                            modifyModNewFilePath = modifyModFolderPath.resolve(modifyMod.fileName());
-                        }
-                        if (modifyMod.newFileName() != null) {
-                            director.getLogger().info("Renaming file {0}", modifyModFilePath);
-                            modifyModNewFilePath = modifyModNewFilePath != null // Moved before?
-                                ? modifyModNewFilePath.resolveSibling(modifyMod.newFileName()) // Yes -> Use new folder
-                                : modifyModFilePath.resolveSibling(modifyMod.newFileName()); // No -> Use old folder
-                        }
-                        if (modifyModNewFilePath != null) {
-                            if (Files.exists(modifyModNewFilePath)) {
-                                Path disabledFilePath = modifyModNewFilePath.resolveSibling(modifyModNewFilePath.getFileName() + ".disabled-by-mod-director");
-                                if (Files.exists(disabledFilePath)) {
-                                    Files.delete(disabledFilePath);
-                                }
-                                Files.move(modifyModNewFilePath, disabledFilePath);
-                            }
-                            Files.move(modifyModFilePath, modifyModNewFilePath);
-                        }
+            }
+            return;
+        }
+
+        Path modifyModFilePath = modifyModFolderPath.resolve(modifyMod.fileName());
+        Path targetPath = null;
+
+        try {
+            if (Files.isRegularFile(modifyModFilePath)) {
+                if (modifyMod.disable()) {
+                    targetPath = modifyModFilePath.resolveSibling(modifyMod.fileName() + ".disabled-by-mod-director");
+                } else if (!modifyMod.delete()) {
+                    if (modifyMod.newFolder() != null) {
+                        Path newFolder = installationRoot.resolve(modifyMod.newFolder());
+                        Files.createDirectories(newFolder);
+                        director.getLogger().info("Moving file {0}", modifyModFilePath);
+                        targetPath = newFolder.resolve(modifyMod.fileName());
+                    }
+
+                    if (modifyMod.newFileName() != null) {
+                        director.getLogger().info("Renaming file {0}", modifyModFilePath);
+                        targetPath = targetPath != null
+                            ? targetPath.resolveSibling(modifyMod.newFileName())
+                            : modifyModFilePath.resolveSibling(modifyMod.newFileName());
                     }
                 }
             }
-        } catch (IOException | UncheckedIOException e) {
+        } catch (IOException e) {
             handleConfigException(e);
+            return;
         }
+
+        Path finalTarget = targetPath;
+
+        safeModify(() -> {
+            if (!Files.isRegularFile(modifyModFilePath)) {
+                return;
+            }
+            if (modifyMod.disable()) {
+                director.getLogger().info("Disabling file {0}", modifyModFilePath);
+                Files.move(modifyModFilePath, finalTarget);
+            } else if (modifyMod.delete()) {
+                director.getLogger().info("Deleting file {0}", modifyModFilePath);
+                safeDelete(modifyModFilePath);
+            } else if (finalTarget != null) {
+                if (Files.exists(finalTarget)) {
+                    Path disabledFilePath = finalTarget.resolveSibling(
+                        finalTarget.getFileName() + ".disabled-by-mod-director");
+                    if (Files.exists(disabledFilePath)) {
+                        safeDelete(disabledFilePath);
+                    }
+                    Files.move(finalTarget, disabledFilePath);
+                }
+                Files.move(modifyModFilePath, finalTarget);
+            }
+        }, "Mod file modification for " + modifyModFilePath.getFileName(), modifyModFilePath, finalTarget);
     }
 
     private void handleConfigException(Exception e) {
@@ -241,5 +317,10 @@ public class ConfigurationController {
             director.getLogger().warn("Ignoring unknown json file {}0", name);
             return null;
         }
+    }
+
+    @FunctionalInterface
+    private interface FileOperation {
+        void run() throws IOException;
     }
 }

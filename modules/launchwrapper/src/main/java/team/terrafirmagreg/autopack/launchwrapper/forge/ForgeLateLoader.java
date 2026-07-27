@@ -351,7 +351,9 @@ public class ForgeLateLoader {
 
         if (fileUrl != null) {
             try {
-                addUrlMethodHandle.invoke(classLoader.getClass().getClassLoader(), fileUrl);
+                if (!isCleanroomLoaded()) {
+                    addUrlMethodHandle.invoke(classLoader.getClass().getClassLoader(), fileUrl);
+                }
                 classLoader.addURL(fileUrl);
             } catch (Throwable e) {
                 directorTweaker.logger().error("Failed to inject tweaker url into ClassLoader, loading might fail!", e);
@@ -441,6 +443,15 @@ public class ForgeLateLoader {
             } catch (Throwable t) {
                 directorTweaker.logger().warn("Failed to add jar to access transformers", t);
             }
+        }
+    }
+
+    private boolean isCleanroomLoaded() {
+        try {
+            Class.forName("com.cleanroommc.common.CleanroomVersion");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
     }
 }

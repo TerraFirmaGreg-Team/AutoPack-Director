@@ -32,49 +32,55 @@ public class InstallSelector {
         List<String> ignoredGroups = new ArrayList<>();
 
         for (RemoteMod mod : excludedMods) {
-            InstallationPolicy policy = mod.getInstallationPolicy();
-            if (policy != null) {
-                String group = policy.optionalKey();
-                if (group != null && !group.equals("$")) {
-                    ignoredGroups.add(group);
-                }
-            }
-        }
-
-        for (InstallableMod mod : reInstall) {
-            RemoteMod remoteMod = mod.remoteMod();
-            if (remoteMod != null) {
-                InstallationPolicy policy = remoteMod.getInstallationPolicy();
+            if (mod != null) {
+                InstallationPolicy policy = mod.getInstallationPolicy();
                 if (policy != null) {
                     String group = policy.optionalKey();
                     if (group != null && !group.equals("$")) {
                         ignoredGroups.add(group);
                     }
                 }
-                alwaysInstall.add(mod);
+            }
+        }
+
+        for (InstallableMod mod : reInstall) {
+            if (mod != null) {
+                RemoteMod remoteMod = mod.remoteMod();
+                if (remoteMod != null) {
+                    InstallationPolicy policy = remoteMod.getInstallationPolicy();
+                    if (policy != null) {
+                        String group = policy.optionalKey();
+                        if (group != null && !group.equals("$")) {
+                            ignoredGroups.add(group);
+                        }
+                    }
+                    alwaysInstall.add(mod);
+                }
             }
         }
 
         for (InstallableMod mod : freshInstalls) {
-            RemoteMod remoteMod = mod.remoteMod();
-            if (remoteMod != null) {
-                InstallationPolicy policy = remoteMod.getInstallationPolicy();
-                if (policy != null) {
-                    String optionalKey = policy.optionalKey();
-                    if (optionalKey == null) {
-                        alwaysInstall.add(mod);
-                    } else if (!ignoredGroups.contains(optionalKey)) {
-                        SelectableInstallOption installOption = new SelectableInstallOption(
-                            policy.isSelectedByDefault(),
-                            policy.name() == null ? remoteMod.offlineName() : policy.name(),
-                            policy.description()
-                        );
-                        if (optionalKey.equals("$")) {
-                            singleOptions.add(installOption);
-                        } else {
-                            groupOptions.computeIfAbsent(optionalKey, k -> new ArrayList<>()).add(installOption);
+            if (mod != null) {
+                RemoteMod remoteMod = mod.remoteMod();
+                if (remoteMod != null) {
+                    InstallationPolicy policy = remoteMod.getInstallationPolicy();
+                    if (policy != null) {
+                        String optionalKey = policy.optionalKey();
+                        if (optionalKey == null) {
+                            alwaysInstall.add(mod);
+                        } else if (!ignoredGroups.contains(optionalKey)) {
+                            SelectableInstallOption installOption = new SelectableInstallOption(
+                                policy.isSelectedByDefault(),
+                                policy.name() == null ? remoteMod.offlineName() : policy.name(),
+                                policy.description()
+                            );
+                            if (optionalKey.equals("$")) {
+                                singleOptions.add(installOption);
+                            } else {
+                                groupOptions.computeIfAbsent(optionalKey, k -> new ArrayList<>()).add(installOption);
+                            }
+                            optionsToMod.put(installOption, mod);
                         }
-                        optionsToMod.put(installOption, mod);
                     }
                 }
             }

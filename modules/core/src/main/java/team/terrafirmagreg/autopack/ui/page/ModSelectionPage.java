@@ -2,10 +2,10 @@ package team.terrafirmagreg.autopack.ui.page;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import team.terrafirmagreg.autopack.i18n.Messages;
-import team.terrafirmagreg.autopack.ui.components.ScrollablePane;
 import team.terrafirmagreg.autopack.core.manage.select.InstallSelector;
 import team.terrafirmagreg.autopack.core.manage.select.SelectableInstallOption;
+import team.terrafirmagreg.autopack.i18n.Messages;
+import team.terrafirmagreg.autopack.ui.components.ScrollablePane;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -67,8 +67,7 @@ public class ModSelectionPage extends JPanel {
             JPanel optionPanel = new JPanel();
             optionPanel.setLayout(new BoxLayout(optionPanel, BoxLayout.Y_AXIS));
 
-            JRadioButton installRadioButton = new JRadioButton(option.getName());
-            installRadioButton.setSelected(option.isSelected());
+            JRadioButton installRadioButton = new JRadioButton(option.getName(), option.isSelected());
             installRadioButton.addItemListener((e) -> option.setSelected(installRadioButton.isSelected()));
             group.add(installRadioButton);
             optionPanel.add(installRadioButton);

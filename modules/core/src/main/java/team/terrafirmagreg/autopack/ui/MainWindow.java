@@ -36,6 +36,7 @@ public class MainWindow extends JFrame {
         this.logger = logger;
         add(root);
         modpackName.setFont(new Font(modpackName.getFont().getName(), Font.BOLD, 20));
+        setAlwaysOnTop(true);
         pack();
         setMinimumSize(getPreferredSize());
     }

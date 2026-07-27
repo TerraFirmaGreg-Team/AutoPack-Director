@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import team.terrafirmagreg.autopack.Director;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-import team.terrafirmagreg.autopack.core.configuration.*;
+import team.terrafirmagreg.autopack.Director;
+import team.terrafirmagreg.autopack.core.configuration.ConfigurationController;
+import team.terrafirmagreg.autopack.core.configuration.RemoteMod;
+import team.terrafirmagreg.autopack.core.configuration.RemoteModInformation;
 import team.terrafirmagreg.autopack.core.exception.InstallException;
 import team.terrafirmagreg.autopack.core.manage.ProgressCallback;
 import team.terrafirmagreg.autopack.core.util.IOOperation;
@@ -47,7 +49,7 @@ public class CurseRemoteMod extends RemoteMod {
 
     @Override
     public String offlineName() {
-        return addonId + ":" + fileId;
+        return "Project ID: " + addonId + ", File ID: " + fileId;
     }
 
     @Override
@@ -61,7 +63,7 @@ public class CurseRemoteMod extends RemoteMod {
         try (WebGetResponse response = WebClient.get(this.information.downloadUrl)) {
             progressCallback.setSteps(1);
             IOOperation.copy(response.getInputStream(), Files.newOutputStream(targetFile), progressCallback,
-                response.getStreamSize());
+                    response.getStreamSize());
         } catch (IOException e) {
             throw new InstallException("Failed to download file", e);
         }

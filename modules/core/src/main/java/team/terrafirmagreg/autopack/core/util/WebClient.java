@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class WebClient {
-    public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36";
+    public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36";
     public static final int CONNECT_TIMEOUT = 15_000;
     public static final int READ_TIMEOUT = 30_000;
 
