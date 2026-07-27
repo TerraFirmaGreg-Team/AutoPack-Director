@@ -28,4 +28,7 @@ public class ModifyMod {
 
     @JsonProperty
     private final String newFileName;
+
+    @JsonProperty
+    private final String comment;
 }

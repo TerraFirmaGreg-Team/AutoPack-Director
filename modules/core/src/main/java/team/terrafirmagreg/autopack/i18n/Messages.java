@@ -1,55 +1,85 @@
 package team.terrafirmagreg.autopack.i18n;
 
-import com.juanmuscaria.autumn.messages.HierarchicalMessageSource;
-import com.juanmuscaria.autumn.messages.NoSuchMessageException;
-import com.juanmuscaria.autumn.messages.standard.ReloadableResourceBundleMessageSource;
-import com.juanmuscaria.autumn.resources.DefaultResourceLoader;
-import com.juanmuscaria.autumn.resources.FileSystemResourceLoader;
+import com.fasterxml.jackson.core.type.TypeReference;
+import team.terrafirmagreg.autopack.core.configuration.ConfigurationController;
+import team.terrafirmagreg.autopack.logging.LoggerDelegate;
 import team.terrafirmagreg.autopack.util.PlatformDelegate;
-import lombok.Getter;
-import lombok.Setter;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.Locale;
+import java.util.Map;
 
 public class Messages {
-    private final HierarchicalMessageSource messages;
-    private final PlatformDelegate platform;
-    private @Setter
-    @Getter Locale userLocale = Locale.getDefault();
+    private static final String LANG_PATH = "/assets/autopack/lang/%s.json";
+    private static final String DEFAULT_LANG = "en_us";
+    private static final TypeReference<Map<String, String>> MAP_TYPE = new TypeReference<Map<String, String>>() {
+    };
 
-    public Messages(PlatformDelegate platform, boolean loadUserMessages) {
-        this.platform = platform;
-        var src = new ReloadableResourceBundleMessageSource();
-        src.setBasename("classpath:team/terrafirmagreg/autopack/i18n/messages");
-        src.setDefaultEncoding("UTF-8");
-        src.setResourceLoader(new DefaultResourceLoader(this.getClass().getClassLoader()));
+    private final Map<String, String> messages;
+    private final LoggerDelegate logger;
 
-        if (loadUserMessages) {
-            var external = new ReloadableResourceBundleMessageSource();
-            external.setResourceLoader(new FileSystemResourceLoader());
-            external.setBasename(platform.configurationDirectory().toString() + "/messages");
-            external.setDefaultEncoding("UTF-8");
-            external.setParentMessageSource(src);
-            src = external;
-        }
+    public Messages(PlatformDelegate platform) {
+        this(platform.languageCode(), platform.logger());
+    }
 
-        this.messages = src;
+    public Messages(String languageCode) {
+        this(languageCode, null);
+    }
+
+    Messages(String languageCode, LoggerDelegate logger) {
+        this.logger = logger;
+        this.messages = load(languageCode);
     }
 
     public String get(String key, Object... params) {
-        try {
-            return messages.getMessage(key, params, userLocale);
-        } catch (IllegalFormatException e) {
-            platform.logger().warn("Unable to format key {0} due to bad expression", key, e);
-        } catch (NoSuchMessageException ignored) {
+        String template = messages.get(key);
+        if (template == null) {
+            return fallbackKey(key, params);
         }
+        try {
+            return String.format(Locale.ROOT, template, params);
+        } catch (IllegalFormatException e) {
+            if (logger != null) {
+                logger.warn("Unable to format key {0} due to bad expression", key, e);
+            }
+            return fallbackKey(key, params);
+        }
+    }
 
+    private Map<String, String> load(String languageCode) {
+        Map<String, String> loaded = new HashMap<>(loadFile(DEFAULT_LANG));
+        String normalized = Language.normalize(languageCode);
+        if (!DEFAULT_LANG.equals(normalized)) {
+            loaded.putAll(loadFile(normalized));
+        }
+        return loaded;
+    }
+
+    private Map<String, String> loadFile(String languageCode) {
+        String path = String.format(LANG_PATH, languageCode);
+        try (InputStream inputStream = Messages.class.getResourceAsStream(path)) {
+            if (inputStream == null) {
+                return Collections.emptyMap();
+            }
+            Map<String, String> parsed = ConfigurationController.OBJECT_MAPPER.readValue(inputStream, MAP_TYPE);
+            return parsed == null ? Collections.emptyMap() : parsed;
+        } catch (IOException e) {
+            if (logger != null) {
+                logger.warn("Unable to load language file {0}", path, e);
+            }
+            return Collections.emptyMap();
+        }
+    }
+
+    private String fallbackKey(String key, Object... params) {
         if (params.length > 0) {
             return key + ':' + Arrays.toString(params);
-        } else {
-            return key;
         }
+        return key;
     }
 }

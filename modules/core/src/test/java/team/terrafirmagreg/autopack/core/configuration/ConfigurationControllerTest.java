@@ -36,6 +36,7 @@ class ConfigurationControllerTest {
         assertEquals("Test Pack", director.getConfigurationController().getModpackConfiguration().packName());
         assertEquals(1, director.getConfigurationController().getConfigurations().size());
         assertTrue(director.getConfigurationController().getConfigurations().get(0) instanceof UrlRemoteMod);
+        assertEquals("example download", director.getConfigurationController().getConfigurations().get(0).getComment());
     }
 
     @Test

@@ -29,6 +29,9 @@ public abstract class RemoteMod {
     @JsonProperty
     private final Boolean inject;
 
+    @JsonProperty
+    private final String comment;
+
     protected RemoteMod(RemoteModBuilder<?, ?> builder) {
         this.metadata = builder.metadata;
         this.installationPolicy = builder.installationPolicy == null
@@ -36,6 +39,7 @@ public abstract class RemoteMod {
         this.options = builder.options == null ? Collections.emptyMap() : builder.options;
         this.folder = builder.folder;
         this.inject = builder.inject;
+        this.comment = builder.comment;
     }
 
     protected RemoteMod(
@@ -50,6 +54,7 @@ public abstract class RemoteMod {
         this.options = options == null ? Collections.emptyMap() : options;
         this.folder = folder;
         this.inject = inject;
+        this.comment = null;
     }
 
     public abstract String remoteType();

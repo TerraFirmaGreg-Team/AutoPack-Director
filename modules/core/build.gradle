@@ -3,12 +3,10 @@ plugins {
 }
 
 dependencies {
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-core", version: '2.15.0'
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.13.5"
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.13.5"
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-core", version: '2.22.1'
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.22"
+    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.22.1"
 
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:233.13135.104'
     implementation 'com.formdev:flatlaf:3.4.1'
-    implementation 'com.juanmuscaria:autumn-messages:1.1-SNAPSHOT'
-    implementation 'com.juanmuscaria:autumn-resources:1.1-SNAPSHOT'
 }

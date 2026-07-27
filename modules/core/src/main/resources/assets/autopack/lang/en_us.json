@@ -1,0 +1,21 @@
+{
+  "autopack.ui.selection.title": "Select mods to install",
+  "autopack.ui.selection.install": "Install",
+  "autopack.ui.selection.next": "Next",
+  "autopack.ui.consent.title": "Review mods before installation",
+  "autopack.ui.consent.message": "To finish the modpack installation the following files will be downloaded and installed, files from unknown sources may be unsafe, please ensure your trust the modpack author before proceeding.",
+  "autopack.ui.consent.accept": "Accept and Install",
+  "autopack.ui.consent.cancel": "Cancel and Exit",
+  "autopack.ui.consent.source": "From %1$s",
+  "autopack.progress.checking": "Checking installation...",
+  "autopack.progress.installing": "Installing %1$s",
+  "autopack.dialog.restart.title": "Restart Required",
+  "autopack.dialog.restart.message": "Installation finished, you may now restart your game to launch the modpack.",
+  "autopack.dialog.restart.button": "Restart",
+  "autopack.dialog.outdated.title": "Modpack outdated!",
+  "autopack.dialog.outdated.message": "Your modpack version does not match the latest remote version.",
+  "autopack.dialog.outdated.button": "Ok",
+  "autopack.dialog.outdated_blocked.title": "Modpack Outdated",
+  "autopack.dialog.outdated_blocked.message": "Your modpack version does not match the latest remote version. Please update before launching the game.",
+  "autopack.dialog.outdated_blocked.button": "Close"
+}

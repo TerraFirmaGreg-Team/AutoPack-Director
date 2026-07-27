@@ -13,4 +13,7 @@ import java.net.URL;
 public class RemoteConfig {
     @JsonProperty(required = true)
     private final URL url;
+
+    @JsonProperty
+    private final String comment;
 }

@@ -1,6 +1,5 @@
 package team.terrafirmagreg.autopack;
 
-import com.juanmuscaria.autumn.messages.MessageSourceSupport;
 import team.terrafirmagreg.autopack.i18n.Messages;
 import team.terrafirmagreg.autopack.logging.LoggerDelegate;
 import team.terrafirmagreg.autopack.ui.MainWindow;
@@ -42,7 +41,6 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Getter
 public class Director implements Callable<Boolean> {
@@ -96,8 +94,6 @@ public class Director implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        var log = Logger.getLogger(MessageSourceSupport.class.getName());
-        log.setLevel(Level.FINEST);
         configurationController.load();
         List<RemoteMod> mods = configurationController.getConfigurations();
         ModpackConfiguration modpackConfiguration = configurationController.getModpackConfiguration();
@@ -124,7 +120,7 @@ public class Director implements Callable<Boolean> {
             return false;
         }
 
-        var messages = new Messages(platform, true);
+        var messages = new Messages(platform);
         if (!platform.headless()) {
             ui = new MainWindow(messages, logger);
             ui.getModpackName().setText(modpackConfiguration.packName());
@@ -152,7 +148,7 @@ public class Director implements Callable<Boolean> {
         }
 
         var preInstallationPage = ui == null ? null
-            : ui.progressPage("modpack_director.progress.check_install");
+            : ui.progressPage("autopack.progress.checking");
 
         List<RemoteMod> excludedMods = new ArrayList<>();
         List<InstallableMod> reInstalls = new ArrayList<>();
@@ -186,7 +182,7 @@ public class Director implements Callable<Boolean> {
         }
 
         var installProgressPage = ui == null ? null :
-            ui.progressPage("modpack_director.progress.install", modpackConfiguration.packName());
+            ui.progressPage("autopack.progress.installing", modpackConfiguration.packName());
 
         List<Callable<Void>> installTasks = installController.createInstallTasks(
             toInstall,
@@ -214,8 +210,8 @@ public class Director implements Callable<Boolean> {
         if (modpackConfiguration.remoteVersion() != null && modpackConfiguration.localVersion() != null && modpackRemoteVersion != null && !modpackRemoteVersion.contains(modpackConfiguration.localVersion())) {
             logger.error("Modpack version mismatch!");
             if (ui != null) {
-                var baseKey = modpackConfiguration.refuseLaunch() ? "modpack_director.modpack_outdated_refuse_launch" : "modpack_director.modpack_outdated";
-                var page = ui.messagePage(baseKey + ".title", baseKey, baseKey + ".button");
+                var baseKey = modpackConfiguration.refuseLaunch() ? "autopack.dialog.outdated_blocked" : "autopack.dialog.outdated";
+                var page = ui.messagePage(baseKey + ".title", baseKey + ".message", baseKey + ".button");
                 page.waitForButton();
             }
 
@@ -228,8 +224,8 @@ public class Director implements Callable<Boolean> {
         if (modpackConfiguration.requiresRestart() && !freshInstalls.isEmpty()) {
             logger.info("Installation complete, a restart is required to complete initialization.");
             if (ui != null) {
-                ui.messagePage("modpack_director.restart_required.title", "modpack_director.restart_required",
-                    "modpack_director.restart_required.button").waitForButton();
+                ui.messagePage("autopack.dialog.restart.title", "autopack.dialog.restart.message",
+                    "autopack.dialog.restart.button").waitForButton();
             }
             UnsafeExit.exit(0);
         }

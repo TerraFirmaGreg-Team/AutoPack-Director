@@ -1,4 +1,5 @@
 {
-  "versionId": "abc123",
+  "addonId": "project-slug",
+  "fileId": "abc123",
   "fileIndex": 0
 }

@@ -12,11 +12,6 @@ allprojects {
                 name = 'intellij-repository'
                 url = 'https://www.jetbrains.com/intellij-repository/releases/'
             }
-            maven {
-                name = "juanmuscaria"
-                url = "https://github.com/juanmuscaria/maven/raw/master"
-                metadataSources.ignoreGradleMetadataRedirection()
-            }
         }
 
         configurations {

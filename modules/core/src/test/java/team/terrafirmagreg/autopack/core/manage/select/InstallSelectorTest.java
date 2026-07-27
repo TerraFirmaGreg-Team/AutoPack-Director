@@ -104,6 +104,25 @@ class InstallSelectorTest {
         assertEquals(1, selector.computeDisabledMods().size());
     }
 
+    @Test
+    void optionalModUsesPolicyNameAndOfflineName() {
+        InstallSelector selector = new InstallSelector();
+        TestRemoteMod remoteMod = TestRemoteMod.builder()
+            .name("Offline Name")
+            .installationPolicy(InstallationPolicy.builder()
+                .optionalKey("$")
+                .selectedByDefault(true)
+                .name("Display Name")
+                .build())
+            .information(new RemoteModInformation("offline.jar", "offline.jar"))
+            .build();
+        InstallableMod mod = new InstallableMod(remoteMod, new RemoteModInformation("offline.jar", "offline.jar"), Paths.get("offline.jar"));
+
+        selector.accept(Collections.emptyList(), Collections.singletonList(mod), Collections.emptyList());
+
+        assertEquals("Display Name - Offline Name", selector.getSingleOptions().get(0).getName());
+    }
+
     private static InstallableMod installable(String fileName, InstallationPolicy policy) {
         TestRemoteMod remoteMod = TestRemoteMod.builder()
             .name(fileName)

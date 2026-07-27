@@ -2,6 +2,7 @@ package team.terrafirmagreg.autopack.launchwrapper;
 
 import team.terrafirmagreg.autopack.Director;
 import team.terrafirmagreg.autopack.launchwrapper.forge.ForgeLateLoader;
+import team.terrafirmagreg.autopack.i18n.Language;
 import team.terrafirmagreg.autopack.logging.JavaLogger;
 import team.terrafirmagreg.autopack.logging.LoggerDelegate;
 import team.terrafirmagreg.autopack.util.PlatformDelegate;
@@ -21,6 +22,7 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -153,6 +155,12 @@ public class Tweaker implements ITweaker, PlatformDelegate {
     @Override
     public boolean headless() {
         return GraphicsEnvironment.isHeadless();
+    }
+
+    @Override
+    public String languageCode() {
+        List<String> launchArgs = args != null ? args : Collections.emptyList();
+        return Language.detect(installationRoot(), launchArgs);
     }
 
     private LoggerDelegate makeLogger() {

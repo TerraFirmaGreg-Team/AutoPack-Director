@@ -27,14 +27,14 @@ public class ConsentPage extends JPanel {
     public ConsentPage(List<InstallableMod> toInstall, Messages messages) {
         this.messages = messages;
         $$$setupUI$$$();
-        pageTitle.setText(messages.get("modpack_director.consent.title"));
-        info.setText(asHtml(messages.get("modpack_director.consent.info")));
+        pageTitle.setText(messages.get("autopack.ui.consent.title"));
+        info.setText(asHtml(messages.get("autopack.ui.consent.message")));
         setLayout(new BorderLayout());
         add(root, BorderLayout.CENTER);
         nextButton.addActionListener((e) -> nextLatch.countDown());
-        nextButton.setText(messages.get("modpack_director.consent.accept_button_label"));
+        nextButton.setText(messages.get("autopack.ui.consent.accept"));
         cancelAndExitButton.addActionListener((e) -> UnsafeExit.exit(0));
-        cancelAndExitButton.setText(messages.get("modpack_director.consent.cancel_button_label"));
+        cancelAndExitButton.setText(messages.get("autopack.ui.consent.cancel"));
         toInstall.forEach(this::createEntry);
     }
 
@@ -51,7 +51,7 @@ public class ConsentPage extends JPanel {
         modPane.add(new JLabel(asHtml(mod.remoteMod().remoteUrl())));
 
         modPane.add(new JLabel(asHtml(mod.targetFile().toString())));
-        var sourceName = messages.get("modpack_director.consent.source", mod.remoteMod().remoteType());
+        var sourceName = messages.get("autopack.ui.consent.source", mod.remoteMod().remoteType());
 
         modPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED), sourceName, TitledBorder.CENTER, TitledBorder.TOP));
 

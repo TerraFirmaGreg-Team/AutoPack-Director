@@ -1,0 +1,10 @@
+{
+  "autopack.ui.selection.title": "Selecione mods para instalar",
+  "autopack.ui.selection.install": "Instalar",
+  "autopack.ui.selection.next": "Próximo",
+  "autopack.progress.checking": "Verificando instalação...",
+  "autopack.progress.installing": "Instalando %1$s",
+  "autopack.dialog.restart.message": "Instalação concluída, reinicie seu jogo para poder iniciar o modpack.",
+  "autopack.dialog.restart.button": "Reiniciar",
+  "autopack.dialog.outdated_blocked.button": "Fechar"
+}

@@ -71,7 +71,7 @@ public class InstallSelector {
                         } else if (!ignoredGroups.contains(optionalKey)) {
                             SelectableInstallOption installOption = new SelectableInstallOption(
                                 policy.isSelectedByDefault(),
-                                policy.name() == null ? remoteMod.offlineName() : policy.name(),
+                                policy.name() == null ? remoteMod.offlineName() : policy.name() + " - " + remoteMod.offlineName(),
                                 policy.description()
                             );
                             if (optionalKey.equals("$")) {

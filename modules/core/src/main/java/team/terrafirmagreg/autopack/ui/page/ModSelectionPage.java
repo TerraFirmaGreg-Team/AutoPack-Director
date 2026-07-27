@@ -25,13 +25,13 @@ public class ModSelectionPage extends JPanel {
     public ModSelectionPage(InstallSelector selector, Messages messages) {
         this.messages = messages;
         $$$setupUI$$$();
-        pageTitle.setText(messages.get("modpack_director.selection_page.title"));
+        pageTitle.setText(messages.get("autopack.ui.selection.title"));
         setLayout(new BorderLayout());
         add(root, BorderLayout.CENTER);
         selector.getSingleOptions().forEach(this::setupSingleOption);
         selector.getGroupOptions().forEach(this::setupGroupOption);
         nextButton.addActionListener((e) -> nextLatch.countDown());
-        nextButton.setText(messages.get("modpack_director.selection_page.next_button_label"));
+        nextButton.setText(messages.get("autopack.ui.selection.next"));
     }
 
     private void createUIComponents() {
@@ -43,7 +43,7 @@ public class ModSelectionPage extends JPanel {
         JPanel optionPanel = new JPanel();
         optionPanel.setLayout(new BoxLayout(optionPanel, BoxLayout.Y_AXIS));
 
-        JCheckBox installCheckBox = new JCheckBox(messages.get("modpack_director.selection_page.install"));
+        JCheckBox installCheckBox = new JCheckBox(messages.get("autopack.ui.selection.install"));
         installCheckBox.setSelected(option.isSelected());
         installCheckBox.addItemListener((e) -> option.setSelected(installCheckBox.isSelected()));
         optionPanel.add(installCheckBox);

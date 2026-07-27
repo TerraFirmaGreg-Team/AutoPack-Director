@@ -1,4 +1,5 @@
 {
   "url": "https://example.com/mods/test-mod.jar",
-  "fileName": "test-mod.jar"
+  "fileName": "test-mod.jar",
+  "comment": "example download"
 }
