@@ -14,15 +14,18 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class UITheme {
+    private static final String ICON_DARK = "/assets/autopack/icon/icon.png";
+    private static final String ICON_LIGHT = "/assets/autopack/icon/icon_alt.png";
+
     public static FlatLaf forName(String themeName) {
         // TODO: load theme json
         return switch (themeName.toLowerCase(Locale.ROOT)) {
-            default -> new FlatLightLaf();
             case "material-dark", "dark" -> new FlatDarkLaf();
             case "intellij-light", "intellij" -> new FlatIntelliJLaf();
             case "intellij-dark", "dracula" -> new FlatDarculaLaf();
             case "mac-light" -> new FlatMacLightLaf();
             case "mac-dark" -> new FlatMacDarkLaf();
+            default -> new FlatLightLaf();
         };
     }
 
@@ -41,10 +44,10 @@ public class UITheme {
             var lookAndFeel = UIManager.getLookAndFeel();
             if (lookAndFeel instanceof FlatLaf materialLookAndFeel) {
                 if (!materialLookAndFeel.isDark()) {
-                    return ImageIO.read(Objects.requireNonNull(UITheme.class.getResourceAsStream("/modpackdirector/ModpackDirectorAlt.png")));
+                    return ImageIO.read(Objects.requireNonNull(UITheme.class.getResourceAsStream(ICON_LIGHT)));
                 }
             }
-            return ImageIO.read(Objects.requireNonNull(UITheme.class.getResourceAsStream("/modpackdirector/ModpackDirector.png")));
+            return ImageIO.read(Objects.requireNonNull(UITheme.class.getResourceAsStream(ICON_DARK)));
         } catch (Exception e) {
             logger.warn("Unable to load built-in app icon", e);
             return new BufferedImage(64, 64, ColorSpace.TYPE_RGB);

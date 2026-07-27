@@ -22,14 +22,15 @@ allprojects {
 
         // Jabel stuff, compile with new java features while targeting java 8
         dependencies {
-            annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.4.2'
+            annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0'
             annotationProcessor 'org.projectlombok:lombok:1.18.46'
             compileOnly 'org.projectlombok:lombok:1.18.46'
-            testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
-            testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+            testImplementation platform('org.junit:junit-bom:6.1.1')
+            testImplementation 'org.junit.jupiter:junit-jupiter'
+            testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
         }
 
-        configure([tasks.compileJava]) {
+        configure(tasks.compileJava) {
             sourceCompatibility = 17 // for the IDE support
             options.release = 8
 
@@ -38,8 +39,13 @@ allprojects {
             }
         }
 
-        compileTestJava {
-            sourceCompatibility = targetCompatibility = 8
+        configure(tasks.compileTestJava) {
+            sourceCompatibility = 17
+            options.release = 17
+
+            javaCompiler = javaToolchains.compilerFor {
+                languageVersion = JavaLanguageVersion.of(17)
+            }
         }
 
         tasks.withType(JavaCompile).configureEach {
@@ -49,7 +55,7 @@ allprojects {
         test {
             useJUnitPlatform()
             javaLauncher = javaToolchains.launcherFor {
-                languageVersion = JavaLanguageVersion.of(8)
+                languageVersion = JavaLanguageVersion.of(17)
             }
         }
     }
