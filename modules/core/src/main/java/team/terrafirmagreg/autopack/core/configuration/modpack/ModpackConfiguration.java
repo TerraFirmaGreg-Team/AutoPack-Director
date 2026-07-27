@@ -34,6 +34,10 @@ public class ModpackConfiguration {
 
     @Getter(AccessLevel.NONE)
     @JsonProperty
+    private final Boolean checkStopModReposts;
+
+    @Getter(AccessLevel.NONE)
+    @JsonProperty
     private final String uiTheme;
 
     public static ModpackConfiguration createDefault() {
@@ -41,6 +45,10 @@ public class ModpackConfiguration {
                 .packName("Modpack Director")
                 .uiTheme("material-dark")
                 .build();
+    }
+
+    public boolean checkStopModReposts() {
+        return checkStopModReposts == null || checkStopModReposts;
     }
 
     public String uiTheme() {

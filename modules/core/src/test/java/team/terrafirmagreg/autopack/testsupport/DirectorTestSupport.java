@@ -9,6 +9,6 @@ public final class DirectorTestSupport {
     }
 
     public static Director create(Path root) {
-        return new Director(new TestPlatform(root), false);
+        return new Director(new TestPlatform(root));
     }
 }

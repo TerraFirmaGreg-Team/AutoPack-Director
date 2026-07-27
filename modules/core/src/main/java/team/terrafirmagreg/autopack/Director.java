@@ -69,16 +69,12 @@ public class Director implements Callable<Boolean> {
     private MainWindow ui;
 
     public Director(PlatformDelegate platform) {
-        this(platform, true);
-    }
-
-    public Director(PlatformDelegate platform, boolean fetchStopModReposts) {
         this.platform = platform;
         this.logger = platform.logger();
         this.prevLookAndFeel = UIManager.getLookAndFeel();
         this.configurationController = new ConfigurationController(this, platform.configurationDirectory());
         this.installController = new InstallController(this);
-        this.stopModReposts = new StopModReposts(this, fetchStopModReposts);
+        this.stopModReposts = new StopModReposts(this);
         initializeTrustStore();
     }
 
@@ -145,6 +141,12 @@ public class Director implements Callable<Boolean> {
         } else {
             logger.warn("This modpack does not contain a modpack.json, if you are the author, consider adding one!");
             modpackConfiguration = ModpackConfiguration.createDefault();
+        }
+
+        if (modpackConfiguration.checkStopModReposts()) {
+            stopModReposts.load();
+        } else {
+            logger.info("StopModReposts checks disabled via modpack.json");
         }
 
         if (modpackConfiguration.remoteVersion() != null) {

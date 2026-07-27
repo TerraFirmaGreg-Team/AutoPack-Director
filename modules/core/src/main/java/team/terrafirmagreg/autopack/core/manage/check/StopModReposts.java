@@ -16,16 +16,17 @@ import java.util.logging.Level;
 public class StopModReposts {
     private final List<StopModRepostsEntry> entries = new ArrayList<>();
     private final Director director;
+    private boolean loaded;
 
     public StopModReposts(Director director) {
-        this(director, true);
+        this.director = director;
     }
 
-    public StopModReposts(Director director, boolean fetchEntries) {
-        this.director = director;
-        if (!fetchEntries) {
+    public void load() {
+        if (loaded) {
             return;
         }
+        loaded = true;
         try (WebGetResponse response =
                  WebClient.get(new URL("https://api.stopmodreposts.org/sites.json"))) {
             JavaType targetType = ConfigurationController.OBJECT_MAPPER.getTypeFactory().
