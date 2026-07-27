@@ -7,11 +7,6 @@ dependencies {
     implementation project(":standalone")
     implementation project(":modlauncher")
     implementation project(":launchwrapper")
-
-    // Jackson is included to ensure it's available at runtime
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-core", version: '2.15.0'
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.13.5"
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.13.5"
 }
 
 jar {
