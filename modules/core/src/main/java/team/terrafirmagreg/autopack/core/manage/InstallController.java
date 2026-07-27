@@ -65,6 +65,36 @@ public class InstallController {
                     return null;
                 }
 
+                String offlineFileName = mod.offlineTargetFilename();
+                if (offlineFileName != null && !offlineFileName.isEmpty()) {
+                    RemoteModInformation offlineInformation =
+                        new RemoteModInformation(offlineFileName, offlineFileName);
+                    Path offlineTarget = computeInstallationTargetPath(mod, offlineInformation);
+                    if (offlineTarget == null) {
+                        callback.done();
+                        return null;
+                    }
+
+                    Path disabledFile = computeDisabledPath(offlineTarget);
+                    if (Files.isRegularFile(disabledFile) || !isVersionCompliant(mod)) {
+                        excludedMods.add(mod);
+                        callback.done();
+                        return null;
+                    }
+
+                    if (!mod.getInstallationPolicy().downloadAlways()
+                        && canSkipExistingInstall(mod, offlineTarget)) {
+                        director.logger().debug(
+                            "Skipping remote query for {0}; local file exists at {1}",
+                            mod.offlineName(),
+                            offlineTarget
+                        );
+                        excludedMods.add(mod);
+                        callback.done();
+                        return null;
+                    }
+                }
+
                 callback.message("Querying mod information");
 
                 RemoteModInformation information;
@@ -188,6 +218,24 @@ public class InstallController {
         }
 
         return preInstallTasks;
+    }
+
+    private boolean canSkipExistingInstall(RemoteMod mod, Path targetFile) {
+        Path bansoukouPatchedFile = computeBansoukouPatchedPath(targetFile);
+        Path bansoukouDisabledFile = computeBansoukouDisabledPath(targetFile);
+        boolean exists = Files.isRegularFile(targetFile)
+            || (Files.isRegularFile(bansoukouPatchedFile) && Files.isRegularFile(bansoukouDisabledFile));
+        if (!exists) {
+            return false;
+        }
+        if (mod.getMetadata() == null) {
+            return true;
+        }
+        HashResult hashResult = mod.getMetadata().checkHashes(
+            Files.isRegularFile(targetFile) ? targetFile : bansoukouDisabledFile,
+            director.platform()
+        );
+        return hashResult == HashResult.UNKNOWN || hashResult == HashResult.MATCHED;
     }
 
     private Path computeInstallationTargetPath(RemoteMod mod, RemoteModInformation information) {

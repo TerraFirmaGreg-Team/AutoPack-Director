@@ -13,6 +13,7 @@ import java.nio.file.Path;
 public class TestRemoteMod extends RemoteMod {
     private final String name;
     private final RemoteModInformation information;
+    private final String offlineTargetFilename;
     private final InstallException queryException;
     private final InstallException installException;
     private final Runnable installAction;
@@ -23,6 +24,7 @@ public class TestRemoteMod extends RemoteMod {
         String folder,
         String name,
         RemoteModInformation information,
+        String offlineTargetFilename,
         InstallException queryException,
         InstallException installException,
         Runnable installAction
@@ -32,6 +34,7 @@ public class TestRemoteMod extends RemoteMod {
         this.information = information != null
             ? information
             : new RemoteModInformation("Test Mod", "test-mod.jar");
+        this.offlineTargetFilename = offlineTargetFilename;
         this.queryException = queryException;
         this.installException = installException;
         this.installAction = installAction;
@@ -49,6 +52,11 @@ public class TestRemoteMod extends RemoteMod {
     @Override
     public String offlineName() {
         return name;
+    }
+
+    @Override
+    public String offlineTargetFilename() {
+        return offlineTargetFilename;
     }
 
     @Override
@@ -82,6 +90,7 @@ public class TestRemoteMod extends RemoteMod {
         private String folder;
         private String name;
         private RemoteModInformation information;
+        private String offlineTargetFilename;
         private InstallException queryException;
         private InstallException installException;
         private Runnable installAction;
@@ -111,6 +120,11 @@ public class TestRemoteMod extends RemoteMod {
             return this;
         }
 
+        public Builder offlineTargetFilename(String offlineTargetFilename) {
+            this.offlineTargetFilename = offlineTargetFilename;
+            return this;
+        }
+
         public Builder queryException(InstallException queryException) {
             this.queryException = queryException;
             return this;
@@ -133,6 +147,7 @@ public class TestRemoteMod extends RemoteMod {
                 folder,
                 name,
                 information,
+                offlineTargetFilename,
                 queryException,
                 installException,
                 installAction

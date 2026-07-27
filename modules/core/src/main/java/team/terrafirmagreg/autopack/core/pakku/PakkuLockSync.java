@@ -58,6 +58,9 @@ public final class PakkuLockSync {
             } else {
                 node.put("fileId", change.getFileId());
             }
+            if (change.getFileName() != null && !change.getFileName().isEmpty()) {
+                node.put("fileName", change.getFileName());
+            }
             node.put("comment", change.getComment());
 
             mapper.writerWithDefaultPrettyPrinter().writeValue(target.toFile(), node);

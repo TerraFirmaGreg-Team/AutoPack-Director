@@ -6,6 +6,9 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-core:2.22.1"
     implementation "com.fasterxml.jackson.core:jackson-annotations:2.22"
     implementation "com.fasterxml.jackson.core:jackson-databind:2.22.1"
+    implementation("com.networknt:json-schema-validator:2.0.4") {
+        exclude group: 'com.fasterxml.jackson.dataformat', module: 'jackson-dataformat-yaml'
+    }
 
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:233.13135.104'
     implementation 'com.formdev:flatlaf:3.4.1'

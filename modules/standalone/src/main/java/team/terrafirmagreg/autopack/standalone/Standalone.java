@@ -1,9 +1,17 @@
 package team.terrafirmagreg.autopack.standalone;
 
 import team.terrafirmagreg.autopack.Director;
+import team.terrafirmagreg.autopack.core.configuration.ConfigValidationRunner;
+
+import java.nio.file.Paths;
 
 public class Standalone {
     public static void main(String[] args) throws Exception {
+        if (args.length > 0 && "--validate".equals(args[0])) {
+            System.exit(ConfigValidationRunner.validate(Paths.get(".", "config", "mod-director")));
+            return;
+        }
+
         StandalonePlatform platform = new StandalonePlatform();
         Director director = new Director(platform);
 

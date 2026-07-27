@@ -1,6 +1,7 @@
 package team.terrafirmagreg.autopack.core.pakku;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import team.terrafirmagreg.autopack.core.configuration.ConfigFileType;
 import team.terrafirmagreg.autopack.core.configuration.ConfigurationController;
 import team.terrafirmagreg.autopack.logging.LoggerDelegate;
 
@@ -100,11 +101,15 @@ public final class PakkuLockDiffer {
             return null;
         }
 
-        String suffix = "curseforge".equals(platform) ? ".curse.json" : ".modrinth.json";
-        Path target = configurationDirectory.resolve(slug + suffix);
+        ConfigFileType configType = ConfigFileType.fromPakkuPlatform(platform);
+        if (configType == null) {
+            return null;
+        }
+        Path target = configurationDirectory.resolve(configType.fileName(slug));
 
         Object addonId;
         String fileId = text(file.get("id"));
+        String fileName = text(file.get("file_name"));
         if (fileId == null) {
             return null;
         }
@@ -129,6 +134,7 @@ public final class PakkuLockDiffer {
                 .platform(platform)
                 .addonId(addonId)
                 .fileId(fileId)
+                .fileName(fileName)
                 .comment(comment != null ? comment : slug)
                 .create(true)
                 .build();
@@ -138,7 +144,12 @@ public final class PakkuLockDiffer {
             JsonNode existing = ConfigurationController.OBJECT_MAPPER.readTree(stream);
             String existingAddon = existing.has("addonId") ? existing.get("addonId").asText() : null;
             String existingFile = existing.has("fileId") ? existing.get("fileId").asText() : null;
-            if (String.valueOf(addonId).equals(existingAddon) && fileId.equals(existingFile)) {
+            String existingFileName = existing.has("fileName") ? existing.get("fileName").asText() : null;
+            boolean idsMatch = String.valueOf(addonId).equals(existingAddon) && fileId.equals(existingFile);
+            boolean fileNameMatch = fileName == null
+                ? existingFileName == null || existingFileName.isEmpty()
+                : fileName.equals(existingFileName);
+            if (idsMatch && fileNameMatch) {
                 return null;
             }
         } catch (IOException e) {
@@ -150,6 +161,7 @@ public final class PakkuLockDiffer {
             .platform(platform)
             .addonId(addonId)
             .fileId(fileId)
+            .fileName(fileName)
             .comment(comment != null ? comment : slug)
             .create(false)
             .build();

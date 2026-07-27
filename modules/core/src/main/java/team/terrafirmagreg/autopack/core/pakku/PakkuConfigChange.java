@@ -12,6 +12,7 @@ public class PakkuConfigChange {
     private final String platform;
     private final Object addonId;
     private final String fileId;
+    private final String fileName;
     private final String comment;
     private final boolean create;
 

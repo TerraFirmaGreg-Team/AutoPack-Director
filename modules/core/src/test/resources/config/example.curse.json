@@ -1,4 +1,5 @@
 {
+  "$schema": "../schemas/curse.schema.json",
   "addonId": 12345,
   "fileId": 67890
 }

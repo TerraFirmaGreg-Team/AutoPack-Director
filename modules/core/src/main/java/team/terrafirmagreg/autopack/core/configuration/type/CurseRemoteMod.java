@@ -53,6 +53,11 @@ public class CurseRemoteMod extends RemoteMod {
     }
 
     @Override
+    public String offlineTargetFilename() {
+        return fileName;
+    }
+
+    @Override
     public String remoteUrl() {
         return information.getDownloadUrl().toString();
     }

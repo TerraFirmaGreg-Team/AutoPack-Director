@@ -1,4 +1,5 @@
 {
+  "$schema": "../schemas/modrinth.schema.json",
   "addonId": "project-slug",
   "fileId": "abc123",
   "fileIndex": 0

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://terrafirmagreg.team/autopack/schemas/modify.schema.json",
+  "title": "Modify local files",
+  "type": "object",
+  "required": ["folder"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "folder": { "type": "string" },
+    "fileName": { "type": "string" },
+    "disable": { "type": "boolean" },
+    "delete": { "type": "boolean" },
+    "newFolder": { "type": "string" },
+    "newFileName": { "type": "string" },
+    "comment": { "type": "string" }
+  }
+}

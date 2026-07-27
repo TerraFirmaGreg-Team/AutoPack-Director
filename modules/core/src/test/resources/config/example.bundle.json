@@ -1,4 +1,5 @@
 {
+  "$schema": "../schemas/bundle.schema.json",
   "curse": [
     {
       "addonId": 1,

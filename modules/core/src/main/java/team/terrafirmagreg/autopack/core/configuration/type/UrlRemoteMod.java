@@ -51,6 +51,14 @@ public class UrlRemoteMod extends RemoteMod {
     }
 
     @Override
+    public String offlineTargetFilename() {
+        if (fileName != null) {
+            return fileName;
+        }
+        return Paths.get(url.getFile()).getFileName().toString();
+    }
+
+    @Override
     public String remoteUrl() {
         return url.toString();
     }

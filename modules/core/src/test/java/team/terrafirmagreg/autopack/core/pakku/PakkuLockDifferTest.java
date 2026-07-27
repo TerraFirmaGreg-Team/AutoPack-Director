@@ -49,6 +49,7 @@ class PakkuLockDifferTest {
         assertEquals("ftb-library-forge.curse.json", change.getTargetPath().getFileName().toString());
         assertEquals(404465, change.getAddonId());
         assertEquals("8226927", change.getFileId());
+        assertEquals("ftb-library-forge-2001.2.13.jar", change.getFileName());
         assertEquals("FTB Library", change.getComment());
     }
 
@@ -111,6 +112,42 @@ class PakkuLockDifferTest {
     }
 
     @Test
+    void applyConfigsWritesFileName() throws Exception {
+        Path target = configDir.resolve("ftb-library-forge.curse.json");
+
+        PakkuDiff diff = PakkuDiff.builder()
+            .configUpdates(List.of(
+                PakkuConfigChange.builder()
+                    .targetPath(target)
+                    .platform("curseforge")
+                    .addonId(404465)
+                    .fileId("8226927")
+                    .fileName("ftb-library-forge-2001.2.13.jar")
+                    .comment("FTB Library")
+                    .create(true)
+                    .build()
+            ))
+            .build();
+
+        PakkuLockSync.applyConfigs(diff, logger);
+
+        JsonNode node = ConfigurationController.OBJECT_MAPPER.readTree(target.toFile());
+        assertEquals("ftb-library-forge-2001.2.13.jar", node.get("fileName").asText());
+    }
+
+    @Test
+    void detectsMissingFileNameAsConfigDrift() throws Exception {
+        copyLock("pakku/lock-single-curse.json");
+        Files.writeString(configDir.resolve("ftb-library-forge.curse.json"),
+            "{\n  \"addonId\": 404465,\n  \"fileId\": 8226927,\n  \"comment\": \"FTB Library\"\n}\n");
+
+        PakkuDiff diff = PakkuLockDiffer.detect(root, configDir, logger);
+
+        assertTrue(diff.hasConfigDrift());
+        assertEquals("ftb-library-forge-2001.2.13.jar", diff.getConfigUpdates().get(0).getFileName());
+    }
+
+    @Test
     void createsModrinthConfig() throws Exception {
         copyLock("pakku/lock-single-modrinth.json");
 
@@ -125,6 +162,7 @@ class PakkuLockDifferTest {
         JsonNode node = ConfigurationController.OBJECT_MAPPER.readTree(change.getTargetPath().toFile());
         assertEquals("cc-tweaked", node.get("addonId").asText());
         assertEquals("OMIJHNkd", node.get("fileId").asText());
+        assertEquals("cc-tweaked.jar", node.get("fileName").asText());
     }
 
     private void copyLock(String resource) throws IOException {

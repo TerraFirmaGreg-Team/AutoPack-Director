@@ -155,6 +155,36 @@ class InstallControllerTest {
     }
 
     @Test
+    void existingOfflineFileSkipsRemoteQuery() throws Exception {
+        Director director = DirectorTestSupport.create(tempDir);
+        Path target = tempDir.resolve("mods").resolve("already-there.jar");
+        Files.createDirectories(target.getParent());
+        Files.write(target, "ok".getBytes());
+
+        TestRemoteMod mod = TestRemoteMod.builder()
+            .offlineTargetFilename("already-there.jar")
+            .queryException(new InstallException("should not query", new ConnectException("refused")))
+            .build();
+
+        List<RemoteMod> excludedMods = new ArrayList<>();
+        List<InstallableMod> freshMods = new ArrayList<>();
+        List<InstallableMod> reinstallMods = new ArrayList<>();
+        List<Callable<Void>> tasks = director.getInstallController().createPreInstallTasks(
+            Collections.singletonList(mod),
+            excludedMods,
+            freshMods,
+            reinstallMods,
+            (title, info) -> new NoOpProgressCallback()
+        );
+        tasks.get(0).call();
+
+        assertTrue(director.getErrors().isEmpty());
+        assertEquals(1, excludedMods.size());
+        assertTrue(freshMods.isEmpty());
+        assertTrue(reinstallMods.isEmpty());
+    }
+
+    @Test
     void markDisabledModsIoFailureAddsWarning() throws Exception {
         Director director = DirectorTestSupport.create(tempDir);
         Path parentFile = tempDir.resolve("not-a-dir");

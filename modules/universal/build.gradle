@@ -35,6 +35,9 @@ shadowJar {
     exclude('META-INF/versions/**')
     mergeServiceFiles()
     relocate('com.fasterxml.jackson', 'team.terrafirmagreg.autopack.shadow.jackson')
+    relocate('com.networknt', 'team.terrafirmagreg.autopack.shadow.networknt')
+    relocate('com.ethlo.time', 'team.terrafirmagreg.autopack.shadow.ethlo.time')
+    relocate('org.slf4j', 'team.terrafirmagreg.autopack.shadow.slf4j')
 }
 
 application {

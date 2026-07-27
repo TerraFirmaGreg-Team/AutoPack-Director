@@ -63,6 +63,10 @@ public abstract class RemoteMod {
 
     public abstract String remoteUrl();
 
+    public String offlineTargetFilename() {
+        return null;
+    }
+
     public abstract RemoteModInformation queryInformation() throws InstallException;
 
     public abstract void performInstall(Path targetFile, ProgressCallback progressCallback, Director director,

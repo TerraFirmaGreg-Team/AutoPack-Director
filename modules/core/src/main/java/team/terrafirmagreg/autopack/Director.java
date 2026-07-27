@@ -6,6 +6,7 @@ import team.terrafirmagreg.autopack.ui.MainWindow;
 import team.terrafirmagreg.autopack.ui.theme.UITheme;
 import team.terrafirmagreg.autopack.util.PlatformDelegate;
 import lombok.Getter;
+import team.terrafirmagreg.autopack.core.configuration.ConfigFileType;
 import team.terrafirmagreg.autopack.core.configuration.ConfigurationController;
 import team.terrafirmagreg.autopack.core.configuration.RemoteMod;
 import team.terrafirmagreg.autopack.core.configuration.modpack.ModpackConfiguration;
@@ -269,12 +270,14 @@ public class Director implements Callable<Boolean> {
     }
 
     private ModpackConfiguration readBootstrapModpackConfiguration() {
-        Path modpackConfigPath = platform.configurationDirectory().resolve("modpack.json");
+        Path modpackConfigPath = platform.configurationDirectory().resolve(ConfigFileType.MODPACK.getSuffix());
         if (!Files.isRegularFile(modpackConfigPath)) {
             return ModpackConfiguration.createDefault();
         }
         try (InputStream stream = Files.newInputStream(modpackConfigPath)) {
-            return ConfigurationController.OBJECT_MAPPER.readValue(stream, ModpackConfiguration.class);
+            var tree = ConfigurationController.stripSchema(
+                ConfigurationController.OBJECT_MAPPER.readTree(stream));
+            return ConfigurationController.OBJECT_MAPPER.treeToValue(tree, ModpackConfiguration.class);
         } catch (IOException e) {
             logger.warn("Failed to read modpack.json for UI bootstrap: {0}", e.getMessage());
             return ModpackConfiguration.createDefault();

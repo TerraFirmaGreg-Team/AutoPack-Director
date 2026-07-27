@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://terrafirmagreg.team/autopack/schemas/remote.schema.json",
+  "title": "Remote config fetch",
+  "type": "object",
+  "required": ["url"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "url": { "type": "string", "format": "uri" },
+    "comment": { "type": "string" }
+  }
+}

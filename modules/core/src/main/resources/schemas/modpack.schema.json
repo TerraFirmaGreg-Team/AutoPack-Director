@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://terrafirmagreg.team/autopack/schemas/modpack.schema.json",
+  "title": "Modpack metadata",
+  "type": "object",
+  "required": ["packName"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "packName": { "type": "string", "minLength": 1 },
+    "icon": {
+      "type": "object",
+      "required": ["path"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" }
+      }
+    },
+    "localVersion": { "type": "string" },
+    "remoteVersion": { "type": "string", "format": "uri" },
+    "refuseLaunch": { "type": "boolean" },
+    "requiresRestart": { "type": "boolean" },
+    "checkStopModReposts": { "type": "boolean" },
+    "uiTheme": { "type": "string" }
+  }
+}

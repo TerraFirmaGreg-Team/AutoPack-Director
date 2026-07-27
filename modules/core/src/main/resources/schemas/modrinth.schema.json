@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://terrafirmagreg.team/autopack/schemas/modrinth.schema.json",
+  "title": "Modrinth remote mod",
+  "type": "object",
+  "required": ["addonId", "fileId"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "addonId": { "type": "string" },
+    "fileId": { "type": "string" },
+    "fileIndex": { "type": "integer", "minimum": 0 },
+    "fileName": { "type": "string" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "side": {
+          "type": "string",
+          "enum": ["CLIENT", "SERVER", "UNKNOWN"]
+        }
+      }
+    },
+    "installationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "continueOnFailedDownload": { "type": "boolean" },
+        "optionalKey": { "type": "string" },
+        "selectedByDefault": { "type": "boolean" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "extract": { "type": "boolean" },
+        "deleteAfterExtract": { "type": "boolean" },
+        "downloadAlways": { "type": "boolean" },
+        "supersede": { "type": "string" },
+        "supersedes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "deleteSuperseded": { "type": "boolean" },
+        "modpackVersion": { "type": "string" }
+      }
+    },
+    "options": { "type": "object" },
+    "folder": { "type": "string" },
+    "inject": { "type": "boolean" },
+    "comment": { "type": "string" }
+  }
+}

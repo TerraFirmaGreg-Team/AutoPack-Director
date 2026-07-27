@@ -61,6 +61,11 @@ public class ModrinthRemoteMod extends RemoteMod {
     }
 
     @Override
+    public String offlineTargetFilename() {
+        return fileName;
+    }
+
+    @Override
     public String remoteUrl() {
         ModrinthFile file = selectedFile();
         if (file != null && file.url != null) {
@@ -94,7 +99,8 @@ public class ModrinthRemoteMod extends RemoteMod {
         }
 
         String displayName = projectTitle != null ? projectTitle : (fileName != null ? fileName : file.filename);
-        return new RemoteModInformation(displayName, file.filename);
+        String targetFilename = fileName != null ? fileName : file.filename;
+        return new RemoteModInformation(displayName, targetFilename);
     }
 
     private void queryTitle() throws InstallException {

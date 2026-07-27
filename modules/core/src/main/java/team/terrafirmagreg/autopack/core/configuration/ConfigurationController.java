@@ -1,12 +1,14 @@
 package team.terrafirmagreg.autopack.core.configuration;
 
-import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import team.terrafirmagreg.autopack.Director;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
+import team.terrafirmagreg.autopack.Director;
 import team.terrafirmagreg.autopack.core.configuration.modpack.ModpackConfiguration;
-import team.terrafirmagreg.autopack.core.configuration.type.*;
+import team.terrafirmagreg.autopack.core.configuration.type.ModifyMod;
+import team.terrafirmagreg.autopack.core.configuration.type.RemoteConfig;
 import team.terrafirmagreg.autopack.core.manage.InstallError;
 import team.terrafirmagreg.autopack.core.util.IOOperation;
 import team.terrafirmagreg.autopack.core.util.JacksonProvider;
@@ -14,9 +16,10 @@ import team.terrafirmagreg.autopack.core.util.WebClient;
 import team.terrafirmagreg.autopack.core.util.WebGetResponse;
 import team.terrafirmagreg.autopack.ui.WarningDisplay;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,16 +45,16 @@ public class ConfigurationController {
     }
 
     public void load() {
-        Path modpackConfigPath = configurationDirectory.resolve("modpack.json");
-        if (Files.exists(modpackConfigPath) && !loadModpackConfiguration(modpackConfigPath)) {
-            return;
+        Path modpackConfigPath = configurationDirectory.resolve(ConfigFileType.MODPACK.getSuffix());
+        if (Files.exists(modpackConfigPath)) {
+            loadModpackConfiguration(modpackConfigPath);
         }
 
         try (Stream<Path> paths = Files.walk(configurationDirectory)) {
             paths
                 .filter(Files::isRegularFile)
                 .filter(p -> p.toString().endsWith(".json"))
-                .filter(p -> !p.getFileName().toString().equals("modpack.json"))
+                .filter(p -> !ConfigFileType.isModpackFileName(p.getFileName().toString()))
                 .sorted()
                 .forEach(this::addConfig);
         } catch (IOException e) {
@@ -61,31 +64,42 @@ public class ConfigurationController {
         }
     }
 
-    private boolean loadModpackConfiguration(Path configurationPath) {
-        try (InputStream stream = Files.newInputStream(configurationPath)) {
-            modpackConfiguration = OBJECT_MAPPER.readValue(stream, ModpackConfiguration.class);
-            return true;
+    private void loadModpackConfiguration(Path configurationPath) {
+        try {
+            modpackConfiguration = readConfig(configurationPath, ConfigFileType.MODPACK);
         } catch (IOException e) {
-            director.getLogger().error("Failed to read modpack configuration!", e);
-            director.addError(new InstallError(Level.SEVERE,
-                "Failed to read modpack configuration!"));
-            return false;
+            handleConfigException(configurationPath, null, e);
+            modpackConfiguration = ModpackConfiguration.createDefault();
         }
     }
 
     private void addConfig(Path configurationPath) {
-        String configString = configurationPath.toString();
+        director.getLogger().info("Loading config {0}", configurationPath.toString());
 
-        director.getLogger().info("Loading config {0}", configString);
+        ConfigFileType type = ConfigFileType.fromPath(configurationPath);
+        if (type == null) {
+            director.getLogger().warn("Ignoring unknown json file {}0", configurationPath.toString());
+            return;
+        }
 
-        if (configString.endsWith(".remote.json")) {
-            handleRemoteConfig(configurationPath);
-        } else if (configString.endsWith(".bundle.json")) {
-            handleBundleConfig(configurationPath);
-        } else if (configString.endsWith(".modify.json")) {
-            handleModifyConfig(configurationPath);
-        } else {
-            handleSingleConfig(configurationPath);
+        switch (type) {
+            case REMOTE:
+                handleRemoteConfig(configurationPath);
+                break;
+            case BUNDLE:
+                handleBundleConfig(configurationPath);
+                break;
+            case MODIFY:
+                handleModifyConfig(configurationPath);
+                break;
+            case CURSE:
+            case MODRINTH:
+            case URL:
+                handleSingleConfig(configurationPath, type);
+                break;
+            default:
+                director.getLogger().warn("Ignoring unknown json file {}0", configurationPath.toString());
+                break;
         }
     }
 
@@ -152,12 +166,13 @@ public class ConfigurationController {
     }
 
     private void handleRemoteConfig(Path configurationPath) {
-        try (InputStream stream = Files.newInputStream(configurationPath)) {
-            RemoteConfig remoteConfig = OBJECT_MAPPER.readValue(stream, RemoteConfig.class);
+        try {
+            RemoteConfig remoteConfig = readConfig(configurationPath, ConfigFileType.REMOTE);
             try (WebGetResponse response = WebClient.get(remoteConfig.getUrl())) {
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 IOOperation.copy(response.getInputStream(), outputStream);
-                String fileName = remoteConfig.getUrl().toString().substring(remoteConfig.getUrl().toString().lastIndexOf('/') + 1);
+                String fileName = remoteConfig.getUrl().toString()
+                    .substring(remoteConfig.getUrl().toString().lastIndexOf('/') + 1);
                 Path installationRoot = director.getPlatform().installationRoot().toAbsolutePath().normalize();
                 Path remoteConfigPath = installationRoot.resolve(configurationDirectory).resolve(fileName);
                 Files.write(remoteConfigPath, outputStream.toByteArray());
@@ -168,64 +183,58 @@ public class ConfigurationController {
                     remoteConfig.getUrl(), e);
             }
         } catch (IOException e) {
-            handleConfigException(e);
+            handleConfigException(configurationPath, null, e);
         }
     }
 
     private void handleBundleConfig(Path configurationPath) {
-        try (InputStream stream = Files.newInputStream(configurationPath);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
-            var jsonTree = OBJECT_MAPPER.readTree(reader);
+        try {
+            JsonNode jsonTree = readConfigTree(configurationPath, ConfigFileType.BUNDLE);
 
-            var jsonArray = jsonTree.get("curse");
-            if (jsonArray != null && jsonArray.isArray()) {
-                for (JsonNode jsonNode : jsonArray) {
-                    configurations.add(OBJECT_MAPPER.treeToValue(jsonNode, CurseRemoteMod.class));
+            for (ConfigFileType entryType : ConfigFileType.bundleEntryTypes()) {
+                JsonNode jsonArray = jsonTree.get(entryType.getSchemaType());
+                if (jsonArray == null || !jsonArray.isArray()) {
+                    continue;
                 }
-            }
-
-            jsonArray = jsonTree.get("modrinth");
-            if (jsonArray != null && jsonArray.isArray()) {
-                for (JsonNode jsonNode : jsonArray) {
-                    configurations.add(OBJECT_MAPPER.treeToValue(jsonNode, ModrinthRemoteMod.class));
-                }
-            }
-
-            jsonArray = jsonTree.get("url");
-            if (jsonArray != null && jsonArray.isArray()) {
-                for (JsonNode jsonNode : jsonArray) {
-                    configurations.add(OBJECT_MAPPER.treeToValue(jsonNode, UrlRemoteMod.class));
-                }
-            }
-
-            jsonArray = jsonTree.get("modify");
-            if (jsonArray != null && jsonArray.isArray()) {
-                for (JsonNode jsonNode : jsonArray) {
-                    handleModifyConfig(OBJECT_MAPPER.treeToValue(jsonNode, ModifyMod.class));
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    String context = entryType.getSchemaType() + "[" + i + "]";
+                    try {
+                        JsonNode entry = stripSchema(jsonArray.get(i).deepCopy());
+                        List<String> schemaErrors = ConfigSchemaValidator.validateNode(entry, entryType);
+                        if (!schemaErrors.isEmpty()) {
+                            reportSchemaErrors(configurationPath, context, schemaErrors);
+                            continue;
+                        }
+                        Object value = OBJECT_MAPPER.treeToValue(entry, entryType.getModelClass());
+                        if (entryType == ConfigFileType.MODIFY) {
+                            handleModifyConfig((ModifyMod) value);
+                        } else {
+                            configurations.add((RemoteMod) value);
+                        }
+                    } catch (IOException e) {
+                        handleConfigException(configurationPath, context, e);
+                    }
                 }
             }
         } catch (IOException e) {
-            handleConfigException(e);
+            handleConfigException(configurationPath, null, e);
         }
     }
 
-    private void handleSingleConfig(Path configurationPath) {
-        Class<? extends RemoteMod> targetType = getTypeForFile(configurationPath);
-        if (targetType != null) {
-            try (InputStream stream = Files.newInputStream(configurationPath)) {
-                configurations.add(OBJECT_MAPPER.readValue(stream, targetType));
-            } catch (IOException e) {
-                handleConfigException(e);
-            }
+    private void handleSingleConfig(Path configurationPath, ConfigFileType type) {
+        try {
+            configurations.add(readConfig(configurationPath, type));
+        } catch (IOException e) {
+            handleConfigException(configurationPath, null, e);
         }
     }
 
     private void handleModifyConfig(Path configurationPath) {
-        try (InputStream stream = Files.newInputStream(configurationPath)) {
-            ModifyMod modifyMod = OBJECT_MAPPER.readValue(stream, ModifyMod.class);
+        try {
+            ModifyMod modifyMod = readConfig(configurationPath, ConfigFileType.MODIFY);
             handleModifyConfig(modifyMod);
         } catch (IOException e) {
-            handleConfigException(e);
+            handleConfigException(configurationPath, null, e);
         }
     }
 
@@ -237,9 +246,9 @@ public class ConfigurationController {
             if (Files.isDirectory(modifyModFolderPath) && modifyMod.delete()) {
                 director.getLogger().info("Deleting folder {0}", modifyModFolderPath);
                 try (Stream<Path> paths = Files.walk(modifyModFolderPath)) {
-                    paths.sorted(Comparator.reverseOrder()).forEach(path -> safeDelete(path));
+                    paths.sorted(Comparator.reverseOrder()).forEach(this::safeDelete);
                 } catch (IOException e) {
-                    handleConfigException(e);
+                    handleConfigException(null, "modify folder " + modifyModFolderPath, e);
                 }
             }
             return;
@@ -269,7 +278,7 @@ public class ConfigurationController {
                 }
             }
         } catch (IOException e) {
-            handleConfigException(e);
+            handleConfigException(null, "modify " + modifyModFilePath, e);
             return;
         }
 
@@ -299,24 +308,55 @@ public class ConfigurationController {
         }, "Mod file modification for " + modifyModFilePath.getFileName(), modifyModFilePath, finalTarget);
     }
 
-    private void handleConfigException(Exception e) {
-        director.getLogger().error("Failed to {0} a configuration for reading!", (e instanceof JsonParseException ? "parse" : "open"), e);
-        director.addError(new InstallError(Level.SEVERE,
-            "Failed to " + (e instanceof JsonParseException ? "parse" : "open") + " a configuration for reading", e));
+    @SuppressWarnings("unchecked")
+    private <T> T readConfig(Path configurationPath, ConfigFileType type) throws IOException {
+        JsonNode tree = readConfigTree(configurationPath, type);
+        return (T) OBJECT_MAPPER.treeToValue(tree, type.getModelClass());
     }
 
-    private Class<? extends RemoteMod> getTypeForFile(Path file) {
-        String name = file.toString();
-        if (name.endsWith(".curse.json")) {
-            return CurseRemoteMod.class;
-        } else if (name.endsWith(".modrinth.json")) {
-            return ModrinthRemoteMod.class;
-        } else if (name.endsWith(".url.json")) {
-            return UrlRemoteMod.class;
-        } else {
-            director.getLogger().warn("Ignoring unknown json file {}0", name);
-            return null;
+    private JsonNode readConfigTree(Path configurationPath, ConfigFileType type) throws IOException {
+        try (InputStream stream = Files.newInputStream(configurationPath)) {
+            JsonNode tree = stripSchema(OBJECT_MAPPER.readTree(stream));
+            List<String> schemaErrors = ConfigSchemaValidator.validateNode(tree, type);
+            if (!schemaErrors.isEmpty()) {
+                throw new ConfigSchemaException(String.join("; ", schemaErrors));
+            }
+            return tree;
         }
+    }
+
+    public static JsonNode stripSchema(JsonNode node) {
+        if (node instanceof ObjectNode objectNode) {
+            objectNode.remove("$schema");
+        }
+        return node;
+    }
+
+    private void reportSchemaErrors(Path configurationPath, String context, List<String> schemaErrors) {
+        handleConfigException(configurationPath, context, new ConfigSchemaException(String.join("; ", schemaErrors)));
+    }
+
+    private void handleConfigException(Path path, String context, Exception e) {
+        String action = e instanceof JsonProcessingException || e instanceof ConfigSchemaException
+            ? "parse" : "open";
+        String location = formatLocation(path, context);
+        String message = "Failed to " + action + " " + location
+            + (e.getMessage() != null ? ": " + e.getMessage() : "");
+        director.getLogger().error(message, e);
+        director.addError(new InstallError(Level.SEVERE, message, e));
+    }
+
+    private static String formatLocation(Path path, String context) {
+        StringBuilder location = new StringBuilder();
+        if (path != null) {
+            location.append(path.getFileName() != null ? path.getFileName().toString() : path.toString());
+        } else {
+            location.append("configuration");
+        }
+        if (context != null && !context.isEmpty()) {
+            location.append(" → ").append(context);
+        }
+        return location.toString();
     }
 
     @FunctionalInterface
