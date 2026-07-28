@@ -31,6 +31,11 @@ import java.nio.file.Path;
 @SuperBuilder
 @Getter
 public class CurseRemoteMod extends RemoteMod {
+    private static final String CURSE_TOOLS_FILE_URL =
+        "https://api.curse.tools/v1/cf/mods/%s/files/%s";
+    private static final String CF_PROXY_FILE_URL =
+        "https://cfproxy.bmpm.workers.dev/v1/mods/%s/files/%s";
+
     @JsonProperty(required = true)
     private final int addonId;
 
@@ -77,15 +82,18 @@ public class CurseRemoteMod extends RemoteMod {
     @Override
     public RemoteModInformation queryInformation() throws InstallException {
         try {
-            URL apiUrl = new URL(String.format("https://api.curse.tools/v1/cf/mods/%s/files/%s", addonId, fileId));
-            WebGetResponse response = WebClient.get(apiUrl);
-            JsonNode jsonObject;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
-                jsonObject = ConfigurationController.OBJECT_MAPPER.readTree(reader).get("data");
+            try {
+                information = fetchFileInformation(new URL(String.format(CURSE_TOOLS_FILE_URL, addonId, fileId)));
+            } catch (IOException primaryFailure) {
+                try {
+                    information = fetchFileInformation(new URL(String.format(CF_PROXY_FILE_URL, addonId, fileId)));
+                } catch (IOException fallbackFailure) {
+                    fallbackFailure.addSuppressed(primaryFailure);
+                    throw fallbackFailure;
+                }
             }
-            information = ConfigurationController.OBJECT_MAPPER.convertValue(jsonObject, CurseAddonFileInformation.class);
         } catch (MalformedURLException e) {
-            throw new InstallException("Failed to create curse.tools api url", e);
+            throw new InstallException("Failed to create curse api url", e);
         } catch (JsonParseException e) {
             throw new InstallException("Failed to parse Json response from curse", e);
         } catch (JsonMappingException e) {
@@ -98,6 +106,18 @@ public class CurseRemoteMod extends RemoteMod {
             return new RemoteModInformation(fileName, fileName);
         } else {
             return new RemoteModInformation(information.displayName, information.fileName);
+        }
+    }
+
+    private static CurseAddonFileInformation fetchFileInformation(URL apiUrl) throws IOException {
+        try (WebGetResponse response = WebClient.get(apiUrl);
+             BufferedReader reader = new BufferedReader(
+                 new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
+            JsonNode data = ConfigurationController.OBJECT_MAPPER.readTree(reader).get("data");
+            if (data == null || data.isNull()) {
+                throw new IOException("Curse API response missing data for " + apiUrl);
+            }
+            return ConfigurationController.OBJECT_MAPPER.convertValue(data, CurseAddonFileInformation.class);
         }
     }
 

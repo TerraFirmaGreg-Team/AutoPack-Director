@@ -84,6 +84,28 @@ class WebClientTest {
         }
     }
 
+    @Test
+    void nonSuccessStatusThrows() throws Exception {
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        int port = server.getAddress().getPort();
+        server.createContext("/forbidden", exchange -> {
+            byte[] body = "blocked".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(403, body.length);
+            exchange.getResponseBody().write(body);
+            exchange.close();
+        });
+        server.start();
+
+        try {
+            URL url = new URL("http://127.0.0.1:" + port + "/forbidden");
+            IOException error = assertThrows(IOException.class, () -> WebClient.get(url));
+            assertTrue(error.getMessage().contains("403"));
+            assertTrue(error.getMessage().contains("/forbidden"));
+        } finally {
+            server.stop(0);
+        }
+    }
+
     private static String readBody(InputStream inputStream) throws IOException {
         byte[] buffer = new byte[256];
         int read = inputStream.read(buffer);

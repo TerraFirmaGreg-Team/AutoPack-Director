@@ -1,6 +1,7 @@
 package team.terrafirmagreg.autopack.core.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,24 +23,26 @@ public class WebClient {
 
         int redirectCount = 0;
         HttpURLConnection httpConnection = (HttpURLConnection) connection;
+        httpConnection.setInstanceFollowRedirects(false);
         httpConnection.setRequestProperty("User-Agent", USER_AGENT);
         httpConnection.connect();
 
         while (true) {
             int status = httpConnection.getResponseCode();
-            if (status - 300 >= 0 && status - 300 <= 99) {
+            if (status >= 300 && status <= 399) {
                 if (redirectCount > 10) {
                     throw new IOException("Server tried to redirect too many times");
                 }
 
                 String newUrl = httpConnection.getHeaderField("Location");
+                if (newUrl == null || newUrl.isEmpty()) {
+                    throw new IOException("Server sent redirect without Location for " + url);
+                }
                 String cookies = readSetCookieHeader(httpConnection);
-
-                httpConnection.getInputStream().close();
-                httpConnection.disconnect();
+                closeQuietly(httpConnection);
 
                 try {
-                    url = new URL(newUrl);
+                    url = upgradeHttpToHttpsIfSameHost(url, new URL(newUrl));
                     connection = url.openConnection();
                     applyTimeouts(connection);
 
@@ -50,6 +53,7 @@ public class WebClient {
                     redirectCount++;
 
                     httpConnection = (HttpURLConnection) connection;
+                    httpConnection.setInstanceFollowRedirects(false);
                     if (cookies != null) {
                         httpConnection.setRequestProperty("Cookie", cookies);
                     }
@@ -63,12 +67,44 @@ public class WebClient {
             }
         }
 
+        int status = httpConnection.getResponseCode();
+        if (status < 200 || status > 299) {
+            closeQuietly(httpConnection);
+            throw new IOException("Server returned HTTP response code: " + status + " for URL: " + url);
+        }
+
         return new WebGetResponse(httpConnection.getInputStream(), httpConnection.getContentLengthLong());
+    }
+
+    private static URL upgradeHttpToHttpsIfSameHost(URL previous, URL redirect) throws MalformedURLException {
+        if (!"https".equalsIgnoreCase(previous.getProtocol())
+            || !"http".equalsIgnoreCase(redirect.getProtocol())
+            || previous.getHost() == null
+            || !previous.getHost().equalsIgnoreCase(redirect.getHost())) {
+            return redirect;
+        }
+
+        int port = redirect.getPort();
+        if (port == 80 || port == -1) {
+            return new URL("https", redirect.getHost(), -1, redirect.getFile());
+        }
+        return new URL("https", redirect.getHost(), port, redirect.getFile());
     }
 
     private static void applyTimeouts(URLConnection connection) {
         connection.setConnectTimeout(CONNECT_TIMEOUT);
         connection.setReadTimeout(READ_TIMEOUT);
+    }
+
+    private static void closeQuietly(HttpURLConnection connection) {
+        try {
+            InputStream errorStream = connection.getErrorStream();
+            if (errorStream != null) {
+                errorStream.close();
+            }
+        } catch (IOException ignored) {
+        }
+        connection.disconnect();
     }
 
     private static String readSetCookieHeader(HttpURLConnection connection) {
