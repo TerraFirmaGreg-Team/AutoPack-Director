@@ -1,0 +1,17 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':ui')
+}
+
+application {
+    mainClass = "${rootProject.property('namespace')}.cli.Cli"
+}
+
+run {
+    def runDir = file('run')
+    runDir.mkdirs()
+    workingDir = runDir
+}

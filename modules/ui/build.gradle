@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api project(':core')
+    implementation libs.forms.rt
+    implementation libs.flatlaf
+}

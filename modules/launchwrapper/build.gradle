@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':core')
+    implementation project(':ui')
     //noinspection VulnerableLibrariesLocal launcher wrapper uses some nasty old libraries, launcher should have them patched however
-    compileOnly 'net.minecraft:launchwrapper:1.12'
+    compileOnly libs.launchwrapper
 }

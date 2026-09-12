@@ -1,27 +1,29 @@
 package team.terrafirmagreg.autopack.modlauncher;
 
-import team.terrafirmagreg.autopack.Director;
-import team.terrafirmagreg.autopack.logging.LoggerDelegate;
-import team.terrafirmagreg.autopack.util.PlatformDelegate;
-import team.terrafirmagreg.autopack.util.Side;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
-import team.terrafirmagreg.autopack.core.manage.InstallError;
-import team.terrafirmagreg.autopack.core.util.NetworkExceptions;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import team.terrafirmagreg.autopack.Director;
+import team.terrafirmagreg.autopack.locale.Messages;
+import team.terrafirmagreg.autopack.logging.LoggerDelegate;
+import team.terrafirmagreg.autopack.logging.MessageFormats;
+import team.terrafirmagreg.autopack.manage.InstallError;
+import team.terrafirmagreg.autopack.ui.DirectorUis;
+import team.terrafirmagreg.autopack.util.NetworkExceptions;
+import team.terrafirmagreg.autopack.util.PlatformDelegate;
+import team.terrafirmagreg.autopack.util.Side;
 
 public class DirectorService implements ITransformationService, PlatformDelegate {
     private final LoggerDelegate logger = new Log4jLogger(LogManager.getLogger("Director"));
@@ -32,7 +34,7 @@ public class DirectorService implements ITransformationService, PlatformDelegate
     public void initialize(IEnvironment env) {
         this.side = figureOutSide(env);
         this.gameDir = env.getProperty(IEnvironment.Keys.GAMEDIR.get()).get();
-        Director director = new Director(this);
+        Director director = new Director(this, DirectorUis.forPlatform(this));
         logger.info("Detected side: {0}", side);
 
         try {
@@ -41,22 +43,22 @@ public class DirectorService implements ITransformationService, PlatformDelegate
             }
         } catch (Exception e) {
             String detail = NetworkExceptions.isConnectivityError(e)
-                ? "Network error: " + NetworkExceptions.describe(e)
-                : "Activation error";
+                    ? Messages.get("autopack.error.network", NetworkExceptions.describe(e))
+                    : Messages.get(
+                            "autopack.error.activation",
+                            e.getMessage() != null
+                                    ? e.getMessage()
+                                    : e.getClass().getSimpleName());
             director.addError(new InstallError(Level.SEVERE, detail, e));
             director.errorExit();
         }
     }
 
     @Override
-    public void beginScanning(IEnvironment iEnvironment) {
-
-    }
+    public void beginScanning(IEnvironment iEnvironment) {}
 
     @Override
-    public void onLoad(IEnvironment env, Set<String> otherServices) {
-
-    }
+    public void onLoad(IEnvironment env, Set<String> otherServices) {}
 
     @Override
     public String name() {
@@ -67,8 +69,8 @@ public class DirectorService implements ITransformationService, PlatformDelegate
     public Path configurationDirectory() {
         File configDir = new File(gameDir.toFile(), "config/mod-director");
         if (!configDir.exists() && !configDir.mkdirs()) {
-            throw new UncheckedIOException(new IOException("Failed to create config directory " +
-                configDir.getAbsolutePath()));
+            throw new UncheckedIOException(
+                    new IOException("Failed to create config directory " + configDir.getAbsolutePath()));
         }
 
         return configDir.toPath();
@@ -113,9 +115,13 @@ public class DirectorService implements ITransformationService, PlatformDelegate
         return new ArrayList<>();
     }
 
-    // based on https://github.com/SpongePowered/Mixin/blob/41a68854f6e63e8ec6d38e7d7612230d7f73a9bc/src/modlauncher/java/org/spongepowered/asm/launch/platform/MixinPlatformAgentMinecraftForge.java#L74
+    // based on
+    // https://github.com/SpongePowered/Mixin/blob/41a68854f6e63e8ec6d38e7d7612230d7f73a9bc/src/modlauncher/java/org/spongepowered/asm/launch/platform/MixinPlatformAgentMinecraftForge.java#L74
     private Side figureOutSide(IEnvironment environment) {
-        final String launchTarget = environment.getProperty(IEnvironment.Keys.LAUNCHTARGET.get()).orElse("missing").toLowerCase(Locale.ROOT);
+        final String launchTarget = environment
+                .getProperty(IEnvironment.Keys.LAUNCHTARGET.get())
+                .orElse("missing")
+                .toLowerCase(Locale.ROOT);
         if (launchTarget.contains("server")) {
             return Side.SERVER;
         }
@@ -161,7 +167,7 @@ class Log4jLogger implements LoggerDelegate {
                 throwable = (Throwable) format[format.length - 1];
                 format = Arrays.copyOf(format, format.length - 1);
             }
-            logger.log(log4jLevel, javaLoggingFormat(message, format));
+            logger.log(log4jLevel, MessageFormats.format(message, format));
             if (throwable != null) {
                 logger.log(log4jLevel, "Exception: ", throwable);
             }

@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':core')
-    compileOnly "cpw.mods:modlauncher:2.1.5"
-    compileOnly "org.apache.logging.log4j:log4j-api:2.20.0"
+    implementation project(':ui')
+    compileOnly libs.modlauncher
+    compileOnly libs.log4j.api
 }

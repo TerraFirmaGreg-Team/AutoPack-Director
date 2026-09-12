@@ -1,13 +1,12 @@
 package team.terrafirmagreg.autopack.launchwrapper.forge;
 
-import net.minecraft.launchwrapper.ITweaker;
-import net.minecraft.launchwrapper.Launch;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.minecraft.launchwrapper.ITweaker;
+import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 
 public class AfterDeobfTweaker implements ITweaker {
     private final List<ITweaker> lateTweakers;
@@ -35,7 +34,10 @@ public class AfterDeobfTweaker implements ITweaker {
     @Override
     public String[] getLaunchArguments() {
         List<String> launchArgs = new ArrayList<>();
-        lateTweakers.stream().map(ITweaker::getLaunchArguments).map(Arrays::asList).forEach(launchArgs::addAll);
+        lateTweakers.stream()
+                .map(ITweaker::getLaunchArguments)
+                .map(Arrays::asList)
+                .forEach(launchArgs::addAll);
 
         return launchArgs.toArray(new String[0]);
     }

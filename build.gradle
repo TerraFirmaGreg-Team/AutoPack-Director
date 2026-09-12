@@ -1,9 +1,25 @@
-group 'team.terrafirmagreg'
-version '1.4.2'
+import org.codehaus.groovy.runtime.GStringImpl
+
+plugins {
+    alias(libs.plugins.spotless)
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    namespace = "${rootProject.property('group')}.${rootProject.property('artifact')}" as GStringImpl
+    javaToolchainVersion = "${rootProject.property('javaToolchainVersion')}"
+    javaVersion = "${rootProject.property('javaVersion')}"
+
+}
+
 
 allprojects {
-    group = rootProject.group
-    version = rootProject.version
+    group = providers.gradleProperty('group').get()
+    version = providers.gradleProperty('version').get()
 
     pluginManager.withPlugin('java') {
         repositories {
@@ -20,31 +36,27 @@ allprojects {
             }
         }
 
-        // Jabel stuff, compile with new java features while targeting java 8
         dependencies {
-            annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0'
-            annotationProcessor 'org.projectlombok:lombok:1.18.46'
-            compileOnly 'org.projectlombok:lombok:1.18.46'
-            testImplementation platform('org.junit:junit-bom:6.1.1')
-            testImplementation 'org.junit.jupiter:junit-jupiter'
-            testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+            annotationProcessor libs.lombok
+            compileOnly libs.lombok
+            testImplementation platform(libs.junit.bom)
+            testImplementation libs.junit.jupiter
+            testRuntimeOnly libs.junit.platform.launcher
         }
 
         configure(tasks.compileJava) {
-            sourceCompatibility = 17 // for the IDE support
-            options.release = 8
+            sourceCompatibility = javaToolchainVersion
 
             javaCompiler = javaToolchains.compilerFor {
-                languageVersion = JavaLanguageVersion.of(17)
+                languageVersion = JavaLanguageVersion.of(javaToolchainVersion)
             }
         }
 
         configure(tasks.compileTestJava) {
-            sourceCompatibility = 17
-            options.release = 17
+            sourceCompatibility = javaToolchainVersion
 
             javaCompiler = javaToolchains.compilerFor {
-                languageVersion = JavaLanguageVersion.of(17)
+                languageVersion = JavaLanguageVersion.of(javaToolchainVersion)
             }
         }
 
@@ -55,7 +67,7 @@ allprojects {
         test {
             useJUnitPlatform()
             javaLauncher = javaToolchains.launcherFor {
-                languageVersion = JavaLanguageVersion.of(17)
+                languageVersion = JavaLanguageVersion.of(javaToolchainVersion)
             }
         }
     }
@@ -63,8 +75,19 @@ allprojects {
     pluginManager.withPlugin('application') {
         run {
             javaLauncher = javaToolchains.launcherFor {
-                languageVersion = JavaLanguageVersion.of(8)
+                languageVersion = JavaLanguageVersion.of(javaToolchainVersion)
             }
         }
     }
+}
+
+spotless {
+    java {
+        target 'modules/*/src/*/java/**/*.java'
+        palantirJavaFormat()
+    }
+}
+
+tasks.named('check') {
+    dependsOn 'spotlessCheck'
 }

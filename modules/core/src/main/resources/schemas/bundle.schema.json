@@ -1,26 +1,36 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://terrafirmagreg.team/autopack/schemas/bundle.schema.json",
+  "$id": "https://raw.githubusercontent.com/TerraFirmaGreg-Team/AutoPack-Director/refs/heads/main/modules/core/src/main/resources/schemas/bundle.schema.json",
   "title": "Bundle of remote mods and modify ops",
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
     "curse": {
       "type": "array",
-      "items": { "type": "object" }
+      "items": {
+        "type": "object"
+      }
     },
     "modrinth": {
       "type": "array",
-      "items": { "type": "object" }
+      "items": {
+        "type": "object"
+      }
     },
     "url": {
       "type": "array",
-      "items": { "type": "object" }
+      "items": {
+        "type": "object"
+      }
     },
     "modify": {
       "type": "array",
-      "items": { "type": "object" }
+      "items": {
+        "type": "object"
+      }
     }
   }
 }

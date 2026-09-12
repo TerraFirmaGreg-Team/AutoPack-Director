@@ -1,10 +1,7 @@
 package team.terrafirmagreg.autopack.util;
 
-import team.terrafirmagreg.autopack.i18n.Language;
-import team.terrafirmagreg.autopack.logging.LoggerDelegate;
-
 import java.nio.file.Path;
-import java.util.Collections;
+import team.terrafirmagreg.autopack.logging.LoggerDelegate;
 
 public interface PlatformDelegate {
     String name();
@@ -26,6 +23,6 @@ public interface PlatformDelegate {
     boolean headless();
 
     default String languageCode() {
-        return Language.detect(installationRoot(), Collections.emptyList());
+        return "en_us";
     }
 }

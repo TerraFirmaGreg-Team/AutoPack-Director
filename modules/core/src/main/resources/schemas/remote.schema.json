@@ -1,13 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://terrafirmagreg.team/autopack/schemas/remote.schema.json",
+  "$id": "https://raw.githubusercontent.com/TerraFirmaGreg-Team/AutoPack-Director/refs/heads/main/modules/core/src/main/resources/schemas/remote.schema.json",
   "title": "Remote config fetch",
   "type": "object",
-  "required": ["url"],
+  "required": [
+    "url"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
-    "url": { "type": "string", "format": "uri" },
-    "comment": { "type": "string" }
+    "$schema": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "comment": {
+      "type": "string"
+    }
   }
 }

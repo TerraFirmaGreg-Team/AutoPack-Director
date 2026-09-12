@@ -1,0 +1,6 @@
+{
+  "packName": "Prompt Flags Pack",
+  "pakku": {
+    "promptConfigCreate": false
+  }
+}

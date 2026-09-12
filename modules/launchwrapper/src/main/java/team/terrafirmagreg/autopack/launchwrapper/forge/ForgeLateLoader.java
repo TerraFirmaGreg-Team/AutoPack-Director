@@ -1,13 +1,5 @@
 package team.terrafirmagreg.autopack.launchwrapper.forge;
 
-import team.terrafirmagreg.autopack.Director;
-import team.terrafirmagreg.autopack.launchwrapper.Tweaker;
-import team.terrafirmagreg.autopack.core.manage.InstallError;
-import team.terrafirmagreg.autopack.core.manage.install.InstalledMod;
-import net.minecraft.launchwrapper.ITweaker;
-import net.minecraft.launchwrapper.Launch;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -23,6 +15,13 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
+import net.minecraft.launchwrapper.ITweaker;
+import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LaunchClassLoader;
+import team.terrafirmagreg.autopack.Director;
+import team.terrafirmagreg.autopack.launchwrapper.Tweaker;
+import team.terrafirmagreg.autopack.manage.InstallError;
+import team.terrafirmagreg.autopack.manage.install.InstalledMod;
 
 public class ForgeLateLoader {
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
@@ -53,10 +52,11 @@ public class ForgeLateLoader {
     @SuppressWarnings("unchecked")
     public void execute() {
         for (String commandlineCoreMod :
-            System.getProperty(ForgeConstants.COREMODS_LOAD_PROPERTY, "").split(",")) {
+                System.getProperty(ForgeConstants.COREMODS_LOAD_PROPERTY, "").split(",")) {
             if (!commandlineCoreMod.isEmpty()) {
-                directorTweaker.logger().debug("Ignoring coremod {0} which has been loaded on the commandline",
-                    commandlineCoreMod);
+                directorTweaker
+                        .logger()
+                        .debug("Ignoring coremod {0} which has been loaded on the commandline", commandlineCoreMod);
                 loadedCoremods.add(commandlineCoreMod);
             }
         }
@@ -65,7 +65,11 @@ public class ForgeLateLoader {
             return;
         }
 
-        directorTweaker.logger().info("Trying to late load {0} mods", director.getInstalledMods().size());
+        directorTweaker
+                .logger()
+                .info(
+                        "Trying to late load {0} mods",
+                        director.getInstalledMods().size());
         director.getInstalledMods().forEach(this::handle);
 
         boolean sortSucceeded = false;
@@ -96,7 +100,9 @@ public class ForgeLateLoader {
 
         for (int i = 0; i < tweakClasses.size(); i++) {
             if (tweakClasses.get(i).endsWith(".FMLDeobfTweaker")) {
-                directorTweaker.logger().debug("Found deobf tweaker at index {0}, adding after deobf tweaker after it", i);
+                directorTweaker
+                        .logger()
+                        .debug("Found deobf tweaker at index {0}, adding after deobf tweaker after it", i);
                 tweakClasses.add(i + 1, "team.terrafirmagreg.autopack.launchwrapper.forge.AfterDeobfTweaker");
                 deobfFound = true;
             }
@@ -113,17 +119,17 @@ public class ForgeLateLoader {
         Class<?> coreModManagerClass;
 
         try {
-            coreModManagerClass =
-                Class.forName(ForgeConstants.CORE_MOD_MANAGER_CLASS, false, getClass().getClassLoader());
-            directorTweaker.logger().info("Found new CoreModManager at {0}!",
-                ForgeConstants.CORE_MOD_MANAGER_CLASS);
+            coreModManagerClass = Class.forName(
+                    ForgeConstants.CORE_MOD_MANAGER_CLASS, false, getClass().getClassLoader());
+            directorTweaker.logger().info("Found new CoreModManager at {0}!", ForgeConstants.CORE_MOD_MANAGER_CLASS);
         } catch (ClassNotFoundException e) {
             directorTweaker.logger().debug("Unable to find new CoreModManager class, trying old...");
 
             try {
                 coreModManagerClass = Class.forName(ForgeConstants.CORE_MOD_MANAGER_CLASS_LEGACY);
-                directorTweaker.logger().info("Found old CoreModManager at {0}!",
-                    ForgeConstants.CORE_MOD_MANAGER_CLASS);
+                directorTweaker
+                        .logger()
+                        .info("Found old CoreModManager at {0}!", ForgeConstants.CORE_MOD_MANAGER_CLASS);
             } catch (ClassNotFoundException ex) {
                 directorTweaker.logger().info("Unable to find old CoreModManager class, Forge support disabled!");
                 return false;
@@ -131,9 +137,8 @@ public class ForgeLateLoader {
         }
 
         try {
-            Method sortTweakListMethod = getMethod(new String[]{
-                ForgeConstants.SORT_TWEAK_LIST_METHOD
-            }, coreModManagerClass);
+            Method sortTweakListMethod =
+                    getMethod(new String[] {ForgeConstants.SORT_TWEAK_LIST_METHOD}, coreModManagerClass);
 
             sortTweakListMethodHandle = LOOKUP.unreflect(sortTweakListMethod);
         } catch (ReflectiveOperationException e) {
@@ -141,10 +146,9 @@ public class ForgeLateLoader {
         }
 
         try {
-            Method getIgnoredModsMethod = getMethod(new String[]{
-                ForgeConstants.IGNORED_MODS_METHOD,
-                ForgeConstants.IGNORED_MODS_METHOD_LEGACY
-            }, coreModManagerClass);
+            Method getIgnoredModsMethod = getMethod(
+                    new String[] {ForgeConstants.IGNORED_MODS_METHOD, ForgeConstants.IGNORED_MODS_METHOD_LEGACY},
+                    coreModManagerClass);
 
             reflectiveIgnoredMods = (List<String>) getIgnoredModsMethod.invoke(null);
         } catch (ReflectiveOperationException e) {
@@ -153,30 +157,43 @@ public class ForgeLateLoader {
         }
 
         try {
-            Method getReparseableCoremodsMethod = getMethod(new String[]{
-                ForgeConstants.GET_REPARSEABLE_COREMODS_METHOD
-            }, coreModManagerClass);
+            Method getReparseableCoremodsMethod =
+                    getMethod(new String[] {ForgeConstants.GET_REPARSEABLE_COREMODS_METHOD}, coreModManagerClass);
 
             reflectiveReparsedCoremods = (List<String>) getReparseableCoremodsMethod.invoke(null);
         } catch (ReflectiveOperationException e) {
-            directorTweaker.logger().warn("Failed to get method for retrieving reparseable coremods, loading might fail!", e);
+            directorTweaker
+                    .logger()
+                    .warn("Failed to get method for retrieving reparseable coremods, loading might fail!", e);
             reflectiveReparsedCoremods = new ArrayList<>();
         }
 
         try {
-            Method handleCascadingTweakMethod = getMethod(new String[]{
-                ForgeConstants.HANDLE_CASCADING_TWEAK_METHOD
-            }, coreModManagerClass, File.class, JarFile.class, String.class, LaunchClassLoader.class, Integer.class);
+            Method handleCascadingTweakMethod = getMethod(
+                    new String[] {ForgeConstants.HANDLE_CASCADING_TWEAK_METHOD},
+                    coreModManagerClass,
+                    File.class,
+                    JarFile.class,
+                    String.class,
+                    LaunchClassLoader.class,
+                    Integer.class);
 
             handleCascadingTweakMethodHandle = LOOKUP.unreflect(handleCascadingTweakMethod);
         } catch (ReflectiveOperationException e) {
-            directorTweaker.logger().warn("Failed to get method for adding tweakers via FML, loading might fail, but trying to fall back to Launchwrapper directly!", e);
+            directorTweaker
+                    .logger()
+                    .warn(
+                            "Failed to get method for adding tweakers via FML, loading might fail, but trying to fall back to Launchwrapper directly!",
+                            e);
         }
 
         try {
-            Method loadCoreModMethod = getMethod(new String[]{
-                ForgeConstants.LOAD_CORE_MOD_METHOD
-            }, coreModManagerClass, LaunchClassLoader.class, String.class, File.class);
+            Method loadCoreModMethod = getMethod(
+                    new String[] {ForgeConstants.LOAD_CORE_MOD_METHOD},
+                    coreModManagerClass,
+                    LaunchClassLoader.class,
+                    String.class,
+                    File.class);
 
             loadCoreModMethodHandle = LOOKUP.unreflect(loadCoreModMethod);
         } catch (ReflectiveOperationException e) {
@@ -186,38 +203,48 @@ public class ForgeLateLoader {
         Class<?> modAccessTransformerClass = null;
 
         try {
-            modAccessTransformerClass =
-                Class.forName(ForgeConstants.MOD_ACCESS_TRANSFORMER_CLASS, false, getClass().getClassLoader());
-            directorTweaker.logger().info("Found new ModAccessTransformer at {0}!",
-                modAccessTransformerClass.getName());
+            modAccessTransformerClass = Class.forName(
+                    ForgeConstants.MOD_ACCESS_TRANSFORMER_CLASS,
+                    false,
+                    getClass().getClassLoader());
+            directorTweaker
+                    .logger()
+                    .info("Found new ModAccessTransformer at {0}!", modAccessTransformerClass.getName());
         } catch (ClassNotFoundException e) {
             directorTweaker.logger().debug("Unable to find new ModAccessTransformer class, trying old...");
 
             try {
-                modAccessTransformerClass =
-                    Class.forName(ForgeConstants.MOD_ACCESS_TRANSFORMER_CLASS_LEGACY, false,
+                modAccessTransformerClass = Class.forName(
+                        ForgeConstants.MOD_ACCESS_TRANSFORMER_CLASS_LEGACY,
+                        false,
                         getClass().getClassLoader());
-                directorTweaker.logger().info("Found old ModAccessTransformer at {0}!",
-                    modAccessTransformerClass.getName());
+                directorTweaker
+                        .logger()
+                        .info("Found old ModAccessTransformer at {0}!", modAccessTransformerClass.getName());
             } catch (ClassNotFoundException classNotFoundException) {
-                directorTweaker.logger().warn("Failed to find ModAccessTransformer class even after trying legacy name. Access transformers for downloaded mods disabled, loading might fail!", e);
+                directorTweaker
+                        .logger()
+                        .warn(
+                                "Failed to find ModAccessTransformer class even after trying legacy name. Access transformers for downloaded mods disabled, loading might fail!",
+                                e);
             }
         }
 
         if (modAccessTransformerClass != null) {
             try {
-                Method addJarMethod = getMethod(new String[]{
-                    ForgeConstants.ADD_JAR_METHOD
-                }, modAccessTransformerClass, JarFile.class);
+                Method addJarMethod = getMethod(
+                        new String[] {ForgeConstants.ADD_JAR_METHOD}, modAccessTransformerClass, JarFile.class);
                 addJarMethodHandle = LOOKUP.unreflect(addJarMethod);
                 addJarRequiresAtList = false;
             } catch (NoSuchMethodException e) {
                 Exception secondException = null;
 
                 try {
-                    Method addJarMethod = getMethod(new String[]{
-                        ForgeConstants.ADD_JAR_METHOD
-                    }, modAccessTransformerClass, JarFile.class, String.class);
+                    Method addJarMethod = getMethod(
+                            new String[] {ForgeConstants.ADD_JAR_METHOD},
+                            modAccessTransformerClass,
+                            JarFile.class,
+                            String.class);
                     addJarMethodHandle = LOOKUP.unreflect(addJarMethod);
                     addJarRequiresAtList = true;
                 } catch (IllegalAccessException | NoSuchMethodException second) {
@@ -225,21 +252,26 @@ public class ForgeLateLoader {
                 }
 
                 if (addJarMethodHandle == null) {
-                    directorTweaker.logger().warn("Failed to find method for injecting access transformers, loading might fail if they are required!");
+                    directorTweaker
+                            .logger()
+                            .warn(
+                                    "Failed to find method for injecting access transformers, loading might fail if they are required!");
                     directorTweaker.logger().warn("\tFailure 1:", e);
                     if (secondException != null) {
                         directorTweaker.logger().warn("\tFailure 2:", secondException);
                     }
                 }
             } catch (IllegalAccessException e) {
-                directorTweaker.logger().warn("Failed to access method for injecting access transformers, loading might fail if they are required!", e);
+                directorTweaker
+                        .logger()
+                        .warn(
+                                "Failed to access method for injecting access transformers, loading might fail if they are required!",
+                                e);
             }
         }
 
         try {
-            Method addUrlMethod = getMethod(new String[]{
-                "addURL"
-            }, URLClassLoader.class, URL.class);
+            Method addUrlMethod = getMethod(new String[] {"addURL"}, URLClassLoader.class, URL.class);
             addUrlMethodHandle = LOOKUP.unreflect(addUrlMethod);
         } catch (ReflectiveOperationException e) {
             directorTweaker.logger().warn("Failed to get addUrl method for URLClassLoader (wtf?), loading might fail!");
@@ -249,7 +281,7 @@ public class ForgeLateLoader {
     }
 
     private Method getMethod(String[] possibleNames, Class<?> targetClass, Class<?>... args)
-        throws NoSuchMethodException {
+            throws NoSuchMethodException {
         Method method = null;
 
         for (String possibleName : possibleNames) {
@@ -260,8 +292,8 @@ public class ForgeLateLoader {
         }
 
         if (method == null) {
-            throw new NoSuchMethodException("Failed to find method using names [" +
-                String.join(", ", possibleNames) + "] on class " + targetClass.getName());
+            throw new NoSuchMethodException("Failed to find method using names [" + String.join(", ", possibleNames)
+                    + "] on class " + targetClass.getName());
         } else {
             method.setAccessible(true);
             return method;
@@ -293,13 +325,18 @@ public class ForgeLateLoader {
                         try {
                             tweakOrder = Integer.parseInt(tweakOrderString);
                         } catch (NumberFormatException e) {
-                            directorTweaker.logger().warn("Failed to parse tweak order for {0}", injectedFile.toString(), e);
+                            directorTweaker
+                                    .logger()
+                                    .warn("Failed to parse tweak order for {0}", injectedFile.toString(), e);
                         }
                     }
 
                     injectTweaker(
-                        injectedFile, jar, tweakClass, tweakOrder,
-                        mod.getOptionBoolean("launchwrapperTweakerForceNext", false));
+                            injectedFile,
+                            jar,
+                            tweakClass,
+                            tweakOrder,
+                            mod.getOptionBoolean("launchwrapperTweakerForceNext", false));
                     return;
                 }
 
@@ -317,8 +354,9 @@ public class ForgeLateLoader {
                 directorTweaker.logger().warn("Downloaded file {0} has no manifest!", injectedFile.toString());
             }
         } catch (IOException e) {
-            directorTweaker.logger().warn("Failed to open indexed file {0} as jar, ignoring",
-                injectedFile.toString(), e);
+            directorTweaker
+                    .logger()
+                    .warn("Failed to open indexed file {0} as jar, ignoring", injectedFile.toString(), e);
         }
     }
 
@@ -339,8 +377,8 @@ public class ForgeLateLoader {
     }
 
     @SuppressWarnings("unchecked")
-    private void injectTweaker(Path injectedFile, JarFile jar, String tweakerClass, Integer sortingOrder,
-                               boolean forceNext) {
+    private void injectTweaker(
+            Path injectedFile, JarFile jar, String tweakerClass, Integer sortingOrder, boolean forceNext) {
         URL fileUrl = null;
 
         try {
@@ -361,15 +399,22 @@ public class ForgeLateLoader {
         }
 
         if (forceNext) {
-            directorTweaker.logger().info("Late injecting tweaker {0} from {1}, forcing it to be called next!",
-                tweakerClass, injectedFile.toString());
+            directorTweaker
+                    .logger()
+                    .info(
+                            "Late injecting tweaker {0} from {1}, forcing it to be called next!",
+                            tweakerClass, injectedFile.toString());
 
             try {
-                ITweaker tweaker = (ITweaker) Class.forName(tweakerClass, true, classLoader).getDeclaredConstructor().newInstance();
+                ITweaker tweaker = (ITweaker) Class.forName(tweakerClass, true, classLoader)
+                        .getDeclaredConstructor()
+                        .newInstance();
                 classLoader.addClassLoaderExclusion(tweakerClass.substring(0, tweakerClass.lastIndexOf('.')));
                 directorTweaker.callInjectedTweaker(tweaker);
             } catch (ReflectiveOperationException e) {
-                directorTweaker.logger().error("Failed to manually load tweaker so it can be injected next, falling back to Forge!", e);
+                directorTweaker
+                        .logger()
+                        .error("Failed to manually load tweaker so it can be injected next, falling back to Forge!", e);
                 forceNext = false;
             }
         }
@@ -381,39 +426,44 @@ public class ForgeLateLoader {
         boolean injectionSucceeded = false;
 
         if (handleCascadingTweakMethodHandle != null) {
-            directorTweaker.logger().info("Late injecting tweaker {0} from {1} using FML",
-                tweakerClass, injectedFile.toString());
+            directorTweaker
+                    .logger()
+                    .info("Late injecting tweaker {0} from {1} using FML", tweakerClass, injectedFile.toString());
 
             try {
                 handleCascadingTweakMethodHandle.invoke(
-                    injectedFile.toFile(),
-                    jar,
-                    tweakerClass,
-                    classLoader,
-                    sortingOrder
-                );
+                        injectedFile.toFile(), jar, tweakerClass, classLoader, sortingOrder);
                 injectionSucceeded = true;
             } catch (Throwable e) {
-                directorTweaker.logger().error("Error while injecting tweaker via FML, falling back to Launchwrapper's own mechanism!", e);
+                directorTweaker
+                        .logger()
+                        .error(
+                                "Error while injecting tweaker via FML, falling back to Launchwrapper's own mechanism!",
+                                e);
             }
         }
 
         if (!injectionSucceeded) {
-            directorTweaker.logger().info("Late injecting tweaker {0} from {1} using Launchwrapper",
-                tweakerClass, injectedFile.toString());
+            directorTweaker
+                    .logger()
+                    .info(
+                            "Late injecting tweaker {0} from {1} using Launchwrapper",
+                            tweakerClass, injectedFile.toString());
             ((List<String>) Launch.blackboard.get("TweakClasses")).add(tweakerClass);
         }
     }
 
     private void injectCorePlugin(Path injectedFile, String coreModClass) {
         if (loadedCoremods.contains(coreModClass)) {
-            directorTweaker.logger().debug("Not injecting core plugin {0} from {1} because it has already been!",
-                coreModClass, injectedFile.toString());
+            directorTweaker
+                    .logger()
+                    .debug(
+                            "Not injecting core plugin {0} from {1} because it has already been!",
+                            coreModClass, injectedFile.toString());
             return;
         }
 
-        directorTweaker.logger().info("Now injecting core plugin {0} from {1}",
-            coreModClass, injectedFile.toString());
+        directorTweaker.logger().info("Now injecting core plugin {0} from {1}", coreModClass, injectedFile.toString());
 
         try {
             classLoader.addURL(injectedFile.toUri().toURL());
@@ -423,8 +473,7 @@ public class ForgeLateLoader {
             }
         } catch (Throwable e) {
             directorTweaker.logger().error("Failed to inject core plugin!", e);
-            director.addError(new InstallError(Level.SEVERE,
-                "Failed to inject core plugin!", e));
+            director.addError(new InstallError(Level.SEVERE, "Failed to inject core plugin!", e));
         }
     }
 

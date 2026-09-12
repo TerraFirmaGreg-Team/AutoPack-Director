@@ -1,12 +1,11 @@
 package team.terrafirmagreg.autopack.testsupport;
 
+import java.nio.file.Path;
+import java.util.logging.Logger;
 import team.terrafirmagreg.autopack.logging.JavaLogger;
 import team.terrafirmagreg.autopack.logging.LoggerDelegate;
 import team.terrafirmagreg.autopack.util.PlatformDelegate;
 import team.terrafirmagreg.autopack.util.Side;
-
-import java.nio.file.Path;
-import java.util.logging.Logger;
 
 public class TestPlatform implements PlatformDelegate {
     private final Path root;

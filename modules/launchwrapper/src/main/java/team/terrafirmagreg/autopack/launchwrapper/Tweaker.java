@@ -1,20 +1,5 @@
 package team.terrafirmagreg.autopack.launchwrapper;
 
-import team.terrafirmagreg.autopack.Director;
-import team.terrafirmagreg.autopack.launchwrapper.forge.ForgeLateLoader;
-import team.terrafirmagreg.autopack.i18n.Language;
-import team.terrafirmagreg.autopack.logging.JavaLogger;
-import team.terrafirmagreg.autopack.logging.LoggerDelegate;
-import team.terrafirmagreg.autopack.util.PlatformDelegate;
-import team.terrafirmagreg.autopack.util.Side;
-import lombok.Getter;
-import team.terrafirmagreg.autopack.core.manage.InstallError;
-import team.terrafirmagreg.autopack.core.util.NetworkExceptions;
-import net.minecraft.launchwrapper.ITweaker;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +10,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+import lombok.Getter;
+import net.minecraft.launchwrapper.ITweaker;
+import net.minecraft.launchwrapper.LaunchClassLoader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import team.terrafirmagreg.autopack.Director;
+import team.terrafirmagreg.autopack.launchwrapper.forge.ForgeLateLoader;
+import team.terrafirmagreg.autopack.locale.Language;
+import team.terrafirmagreg.autopack.locale.Messages;
+import team.terrafirmagreg.autopack.logging.JavaLogger;
+import team.terrafirmagreg.autopack.logging.LoggerDelegate;
+import team.terrafirmagreg.autopack.logging.MessageFormats;
+import team.terrafirmagreg.autopack.manage.InstallError;
+import team.terrafirmagreg.autopack.ui.DirectorUis;
+import team.terrafirmagreg.autopack.util.NetworkExceptions;
+import team.terrafirmagreg.autopack.util.PlatformDelegate;
+import team.terrafirmagreg.autopack.util.Side;
 
 public class Tweaker implements ITweaker, PlatformDelegate {
     private final LoggerDelegate logger = makeLogger();
@@ -32,16 +34,20 @@ public class Tweaker implements ITweaker, PlatformDelegate {
     private final Director director;
 
     private List<String> args;
+
     @Getter
     private File gameDir;
+
     private File assetsDir;
+
     @Getter
     private String profile;
+
     private LaunchClassLoader classLoader;
     private Side side;
 
     public Tweaker() {
-        this.director = new Director(this);
+        this.director = new Director(this, DirectorUis.forPlatform(this));
     }
 
     @Override
@@ -60,8 +66,7 @@ public class Tweaker implements ITweaker, PlatformDelegate {
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
         this.classLoader = classLoader;
-        URL minecraftMainClass =
-            classLoader.getResource("net/minecraft/client/main/Main.class");
+        URL minecraftMainClass = classLoader.getResource("net/minecraft/client/main/Main.class");
         if (minecraftMainClass != null) {
             side = Side.CLIENT;
         } else {
@@ -75,8 +80,12 @@ public class Tweaker implements ITweaker, PlatformDelegate {
             }
         } catch (Exception e) {
             String detail = NetworkExceptions.isConnectivityError(e)
-                ? "Network error: " + NetworkExceptions.describe(e)
-                : "Activation error";
+                    ? Messages.get("autopack.error.network", NetworkExceptions.describe(e))
+                    : Messages.get(
+                            "autopack.error.activation",
+                            e.getMessage() != null
+                                    ? e.getMessage()
+                                    : e.getClass().getSimpleName());
             director.addError(new InstallError(Level.SEVERE, detail, e));
             director.errorExit();
         }
@@ -109,10 +118,10 @@ public class Tweaker implements ITweaker, PlatformDelegate {
 
     @Override
     public Path configurationDirectory() {
-        File configDir = new File(gameDir, "config/mod-director");
+        File configDir = new File(resolveGameDir(), "config/mod-director");
         if (!configDir.exists() && !configDir.mkdirs()) {
-            throw new UncheckedIOException(new IOException("Failed to create config directory " +
-                configDir.getAbsolutePath()));
+            throw new UncheckedIOException(
+                    new IOException("Failed to create config directory " + configDir.getAbsolutePath()));
         }
 
         return configDir.toPath();
@@ -120,22 +129,29 @@ public class Tweaker implements ITweaker, PlatformDelegate {
 
     @Override
     public Path modFile(String modFileName) {
-        return gameDir.toPath().resolve("mods").resolve(modFileName);
+        return resolveGameDir().toPath().resolve("mods").resolve(modFileName);
     }
 
     @Override
     public Path customFile(String modFileName, String modFolderName) {
-        return gameDir.toPath().resolve(modFolderName).resolve(modFileName);
+        return resolveGameDir().toPath().resolve(modFolderName).resolve(modFileName);
     }
 
     @Override
     public Path rootFile(String modFileName) {
-        return gameDir.toPath().resolve(modFileName);
+        return resolveGameDir().toPath().resolve(modFileName);
     }
 
     @Override
     public Path installationRoot() {
-        return gameDir.toPath();
+        return resolveGameDir().toPath();
+    }
+
+    private File resolveGameDir() {
+        if (gameDir != null) {
+            return gameDir;
+        }
+        return new File(".").getAbsoluteFile();
     }
 
     @Override
@@ -150,7 +166,6 @@ public class Tweaker implements ITweaker, PlatformDelegate {
         }
         return side;
     }
-
 
     @Override
     public boolean headless() {
@@ -190,7 +205,7 @@ class Log4jLogger implements LoggerDelegate {
                 throwable = (Throwable) format[format.length - 1];
                 format = Arrays.copyOf(format, format.length - 1);
             }
-            logger.log(log4jLevel, javaLoggingFormat(message, format));
+            logger.log(log4jLevel, MessageFormats.format(message, format));
             if (throwable != null) {
                 logger.log(log4jLevel, "Exception: ", throwable);
             }

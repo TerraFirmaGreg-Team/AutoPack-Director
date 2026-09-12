@@ -1,6 +1,5 @@
 package team.terrafirmagreg.autopack.logging;
 
-import java.text.MessageFormat;
 import java.util.logging.Level;
 
 /**
@@ -27,16 +26,5 @@ public interface LoggerDelegate {
 
     default void debug(String message, Object... format) {
         log(Level.FINE, message, format);
-    }
-
-    default String javaLoggingFormat(String message, Object... format) {
-        if (format == null || format.length == 0) {
-            return message;
-        }
-        try {
-            return MessageFormat.format(message, format);
-        } catch (Exception ex) {
-            return message;
-        }
     }
 }

@@ -1,10 +1,21 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal() {
+            content {
+                excludeGroup('org.apache.logging.log4j')
+            }
+        }
+        mavenCentral()
+    }
+}
+
 plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
-rootProject.name = 'AutoPack-Director'
+rootProject.name = "${name}"
 
-['core', 'standalone', 'launchwrapper', 'modlauncher', 'universal'].each { name ->
+['core', 'ui', 'cli', 'launchwrapper', 'modlauncher', 'dist'].each { name ->
     include name
     project(":$name").projectDir = file("modules/$name")
 }

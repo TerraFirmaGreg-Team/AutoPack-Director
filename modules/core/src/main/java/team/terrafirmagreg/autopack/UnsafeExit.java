@@ -1,10 +1,9 @@
 package team.terrafirmagreg.autopack;
 
-import net.minecraftforge.fml.exit.QualifiedExit;
-
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import net.minecraftforge.fml.exit.QualifiedExit;
 
 /**
  * Attempts to bypass forge security manager
@@ -28,10 +27,12 @@ public class UnsafeExit {
                 }
                 if (unsafe != null) {
                     var lookupField = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
-                    long lookupFieldOffset = (long) unsafeClass.getDeclaredMethod("staticFieldOffset", Field.class)
-                        .invoke(unsafe, lookupField);
-                    lookup = (MethodHandles.Lookup) unsafeClass.getDeclaredMethod("getObject", Object.class, long.class)
-                        .invoke(unsafe, MethodHandles.Lookup.class, lookupFieldOffset);
+                    long lookupFieldOffset = (long) unsafeClass
+                            .getDeclaredMethod("staticFieldOffset", Field.class)
+                            .invoke(unsafe, lookupField);
+                    lookup = (MethodHandles.Lookup) unsafeClass
+                            .getDeclaredMethod("getObject", Object.class, long.class)
+                            .invoke(unsafe, MethodHandles.Lookup.class, lookupFieldOffset);
                 }
             } catch (Throwable ignored) {
                 // Hope we have access to normal reflection, eh?

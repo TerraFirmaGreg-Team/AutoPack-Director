@@ -1,14 +1,13 @@
 package team.terrafirmagreg.autopack.testsupport;
 
-import team.terrafirmagreg.autopack.Director;
-import team.terrafirmagreg.autopack.core.configuration.InstallationPolicy;
-import team.terrafirmagreg.autopack.core.configuration.RemoteMod;
-import team.terrafirmagreg.autopack.core.configuration.RemoteModInformation;
-import team.terrafirmagreg.autopack.core.configuration.RemoteModMetadata;
-import team.terrafirmagreg.autopack.core.exception.InstallException;
-import team.terrafirmagreg.autopack.core.manage.ProgressCallback;
-
 import java.nio.file.Path;
+import team.terrafirmagreg.autopack.Director;
+import team.terrafirmagreg.autopack.configuration.InstallationPolicy;
+import team.terrafirmagreg.autopack.configuration.RemoteMod;
+import team.terrafirmagreg.autopack.configuration.RemoteModInformation;
+import team.terrafirmagreg.autopack.configuration.RemoteModMetadata;
+import team.terrafirmagreg.autopack.exception.InstallException;
+import team.terrafirmagreg.autopack.manage.ProgressCallback;
 
 public class TestRemoteMod extends RemoteMod {
     private final String name;
@@ -19,21 +18,18 @@ public class TestRemoteMod extends RemoteMod {
     private final Runnable installAction;
 
     private TestRemoteMod(
-        RemoteModMetadata metadata,
-        InstallationPolicy installationPolicy,
-        String folder,
-        String name,
-        RemoteModInformation information,
-        String offlineTargetFilename,
-        InstallException queryException,
-        InstallException installException,
-        Runnable installAction
-    ) {
+            RemoteModMetadata metadata,
+            InstallationPolicy installationPolicy,
+            String folder,
+            String name,
+            RemoteModInformation information,
+            String offlineTargetFilename,
+            InstallException queryException,
+            InstallException installException,
+            Runnable installAction) {
         super(metadata, installationPolicy, null, folder, null);
         this.name = name != null ? name : "test-mod";
-        this.information = information != null
-            ? information
-            : new RemoteModInformation("Test Mod", "test-mod.jar");
+        this.information = information != null ? information : new RemoteModInformation("Test Mod", "test-mod.jar");
         this.offlineTargetFilename = offlineTargetFilename;
         this.queryException = queryException;
         this.installException = installException;
@@ -73,8 +69,9 @@ public class TestRemoteMod extends RemoteMod {
     }
 
     @Override
-    public void performInstall(Path targetFile, ProgressCallback progressCallback, Director director,
-                               RemoteModInformation information) throws InstallException {
+    public void performInstall(
+            Path targetFile, ProgressCallback progressCallback, Director director, RemoteModInformation information)
+            throws InstallException {
         if (installException != null) {
             throw installException;
         }
@@ -142,16 +139,15 @@ public class TestRemoteMod extends RemoteMod {
 
         public TestRemoteMod build() {
             return new TestRemoteMod(
-                metadata,
-                installationPolicy,
-                folder,
-                name,
-                information,
-                offlineTargetFilename,
-                queryException,
-                installException,
-                installAction
-            );
+                    metadata,
+                    installationPolicy,
+                    folder,
+                    name,
+                    information,
+                    offlineTargetFilename,
+                    queryException,
+                    installException,
+                    installAction);
         }
     }
 }
