@@ -1,0 +1,63 @@
+allprojects {
+    group = providers.gradleProperty('group').get()
+    version = providers.gradleProperty('version').get()
+
+    pluginManager.withPlugin('java') {
+        repositories {
+            mavenCentral()
+            maven {
+                name = 'intellij-repository'
+                url = 'https://www.jetbrains.com/intellij-repository/releases/'
+            }
+        }
+
+        configurations {
+            compileOnly {
+                extendsFrom annotationProcessor
+            }
+        }
+
+        dependencies {
+            annotationProcessor libs.lombok
+            compileOnly libs.lombok
+            testImplementation platform(libs.junit.bom)
+            testImplementation libs.junit.jupiter
+            testRuntimeOnly libs.junit.platform.launcher
+        }
+
+        configure(tasks.compileJava) {
+            sourceCompatibility = javaToolchainVersion
+
+            javaCompiler = javaToolchains.compilerFor {
+                languageVersion = JavaLanguageVersion.of(javaToolchainVersion)
+            }
+        }
+
+        configure(tasks.compileTestJava) {
+            sourceCompatibility = javaToolchainVersion
+
+            javaCompiler = javaToolchains.compilerFor {
+                languageVersion = JavaLanguageVersion.of(javaToolchainVersion)
+            }
+        }
+
+        tasks.withType(JavaCompile).configureEach {
+            options.encoding = 'UTF-8'
+        }
+
+        test {
+            useJUnitPlatform()
+            javaLauncher = javaToolchains.launcherFor {
+                languageVersion = JavaLanguageVersion.of(javaToolchainVersion)
+            }
+        }
+    }
+
+    pluginManager.withPlugin('application') {
+        run {
+            javaLauncher = javaToolchains.launcherFor {
+                languageVersion = JavaLanguageVersion.of(javaToolchainVersion)
+            }
+        }
+    }
+}

@@ -15,7 +15,7 @@ plugins {
 
 rootProject.name = "${name}"
 
-['core', 'ui', 'cli', 'launchwrapper', 'modlauncher', 'dist'].each { name ->
+['core', 'ui', 'cli', 'launchwrapper', 'modlauncher'].each { name ->
     include name
     project(":$name").projectDir = file("modules/$name")
 }

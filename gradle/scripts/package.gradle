@@ -1,0 +1,66 @@
+dependencies {
+    implementation project(':cli')
+    implementation project(':modlauncher')
+    implementation project(':launchwrapper')
+}
+
+jvmdg {
+    downgradeTo = JavaVersion.VERSION_1_8
+}
+
+
+def launchManifestAttributes = [
+        "Main-Class"            : "${namespace}.cli.Cli",
+        "TweakClass"            : "${namespace}.launchwrapper.Tweaker",
+        "TweakOrder"            : Integer.MIN_VALUE,
+        "Specification-Title"   : rootProject.property('name'),
+        "Specification-Vendor"  : rootProject.property('vendor'),
+        "Specification-Version" : 1,
+        "Implementation-Title"  : rootProject.property('name'),
+        "Implementation-Vendor" : rootProject.property('vendor'),
+        "Implementation-Version": "${project.version}"
+]
+
+jar {
+    manifest {
+        attributes(launchManifestAttributes)
+    }
+    archiveBaseName = rootProject.property('name')
+    destinationDirectory.set(layout.buildDirectory.dir('jar'))
+}
+
+shadowJar {
+    archiveClassifier.set('shadow')
+    enableAutoRelocation = false
+    mergeServiceFiles()
+    exclude 'META-INF/MANIFEST.MF'
+    exclude 'module-info.class'
+
+    relocate('tools.jackson', "${namespace}.shadow.jackson")
+    relocate('com.fasterxml.jackson', "${namespace}.shadow.jackson")
+    relocate('com.networknt', "${namespace}.shadow.networknt")
+    relocate('com.ethlo.time', "${namespace}.shadow.ethlo.time")
+    relocate('org.slf4j', "${namespace}.shadow.slf4j")
+    relocate('org.snakeyaml', "${namespace}.shadow.snakeyaml")
+}
+
+tasks.named('downgradeJar') {
+    dependsOn('shadowJar')
+    archiveClassifier.set('downgraded')
+}
+
+tasks.named('shadeDowngradedApi') {
+    dependsOn('downgradeJar')
+    inputFile.set(tasks.named('downgradeJar').flatMap { it.archiveFile })
+    shadePath("${namespace}.shadow.jvmdg".replace('.', '/'))
+    archiveFileName = "${rootProject.property('name')}-${project.version}.jar"
+    from(zipTree(tasks.named('shadowJar').flatMap { it.archiveFile })) { include 'META-INF/versions/**' }
+}
+
+tasks.named('build') {
+    dependsOn('shadeDowngradedApi')
+    doLast {
+        delete tasks.named('shadowJar').flatMap { it.archiveFile }
+        delete tasks.named('downgradeJar').flatMap { it.archiveFile }
+    }
+}
