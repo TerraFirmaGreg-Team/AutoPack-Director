@@ -1,0 +1,17 @@
+allprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'intellij-repository'
+            url = 'https://www.jetbrains.com/intellij-repository/releases/'
+        }
+        maven {
+            name = 'minecraft'
+            url = 'https://libraries.minecraft.net'
+        }
+        maven {
+            name = 'neoforged'
+            url = 'https://maven.neoforged.net/releases'
+        }
+    }
+}

@@ -11,7 +11,5 @@ application {
 }
 
 run {
-    def runDir = file('run')
-    runDir.mkdirs()
-    workingDir = runDir
+    workingDir = file('run').tap { mkdirs() }
 }

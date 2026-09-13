@@ -1,5 +1,3 @@
-import org.codehaus.groovy.runtime.GStringImpl
-
 plugins {
     id 'java'
     alias(libs.plugins.spotless)
@@ -7,27 +5,11 @@ plugins {
     alias(libs.plugins.jvmdowngrader)
 }
 
-repositories {
-    mavenCentral()
-}
-
-
 ext {
-    namespace = "${rootProject.property('group')}.${rootProject.property('artifact')}" as GStringImpl
-    javaToolchainVersion = "${rootProject.property('javaToolchainVersion')}"
-    javaVersion = "${rootProject.property('javaVersion')}"
+    namespace = "${rootProject.property('group')}.${rootProject.property('artifact')}"
 }
 
+apply from: 'gradle/scripts/repositories.gradle'
 apply from: 'gradle/scripts/modules.gradle'
+apply from: 'gradle/scripts/spotless.gradle'
 apply from: 'gradle/scripts/package.gradle'
-
-spotless {
-    java {
-        target 'modules/*/src/*/java/**/*.java'
-        palantirJavaFormat()
-    }
-}
-
-tasks.named('check') {
-    dependsOn 'spotlessCheck'
-}

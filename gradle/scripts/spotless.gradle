@@ -1,0 +1,10 @@
+spotless {
+    java {
+        target 'modules/*/src/*/java/**/*.java'
+        palantirJavaFormat()
+    }
+}
+
+tasks.named('check') {
+    dependsOn 'spotlessCheck'
+}

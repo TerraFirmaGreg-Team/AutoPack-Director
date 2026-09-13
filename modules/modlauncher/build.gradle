@@ -2,13 +2,6 @@ plugins {
     id 'java-library'
 }
 
-repositories {
-    maven {
-        name "neoforged"
-        url "https://maven.neoforged.net/releases"
-    }
-}
-
 dependencies {
     implementation project(':ui')
     compileOnly libs.modlauncher

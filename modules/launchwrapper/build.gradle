@@ -2,13 +2,6 @@ plugins {
     id 'java-library'
 }
 
-repositories {
-    maven {
-        name = 'minecraft'
-        url = 'https://libraries.minecraft.net'
-    }
-}
-
 dependencies {
     implementation project(':ui')
     //noinspection VulnerableLibrariesLocal launcher wrapper uses some nasty old libraries, launcher should have them patched however
