@@ -26,7 +26,6 @@ jar {
         attributes(launchManifestAttributes)
     }
     archiveBaseName = rootProject.property('name')
-    destinationDirectory.set(layout.buildDirectory.dir('jar'))
 }
 
 shadowJar {
